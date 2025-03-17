@@ -20,8 +20,13 @@ const CadastroScreen = () => {
   const { loading, cadastroNewUser } = useContext(AuthContext)
 
   const handleSignUp = async () => {
-    cadastroNewUser(name, email, senha, telefone)
-    console.log(cadastroNewUser);
+    const cadastoUser = await cadastroNewUser(name, email, senha, telefone)
+
+    if (!cadastoUser) {
+      return Alert.alert("Erro ao criar conta!")
+    }
+
+    // Se tiver ele direciona para HOME
     navigation.navigate("Home")
   };
 

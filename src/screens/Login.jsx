@@ -17,21 +17,21 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   // Context
-  const { login, loading, loginDataUser } = useContext(AuthContext)
+  const { login, loading } = useContext(AuthContext)
+
 
   // Função chamada ao clicar no botão de login
   const handleLogin = async () => {
     // Faz o login e aguarda a resposta
-    const login = await login(email, senha)
+    const loginUser = await login(email, senha)
 
     // Verificando se ha um usuario com esses dados no banco
-    if (!login) {
-      navigation.navigate('Home');
-      Alert.alert("Você não possui uma conta!")
+    if (!loginUser) {
+      return Alert.alert("Você não possui uma conta!")
     }
 
+    // Se tiver ele direciona para HOME
     navigation.navigate('Home');
-    console.log(login);
   };
 
 
@@ -42,7 +42,7 @@ const LoginScreen = () => {
 
   return (
     <Container>
-      <Spinner visible={loading} />
+      <Spinner visible={loading} value="Carregando ..." />
       {/* Logo */}
       <LogoWrapper>
         <LogoImage source={require('../../src/assets/topBarber.png')} />

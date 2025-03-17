@@ -13,9 +13,6 @@ const Stack = createNativeStackNavigator()
 export const Routes = () => {
   const { userInfo } = useContext(AuthContext)
 
-  console.log("User Info:", userInfo);
-
-
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName='Login'>

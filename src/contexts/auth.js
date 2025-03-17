@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Para armazenar os dados do token
 import React, { createContext, useEffect, useState } from "react";
-import { createNewUser } from "../functions/Register"
-import { loginUser } from "../functions/Login"
+import api from "../services/api"
 
 export const AuthContext = createContext({})
 
@@ -17,36 +16,61 @@ export const AuthProvider = ({ children }) => {
 
 
 
-  // Function de login do usuario
+  // Function de LOGIN do usuario
   const login = async (email, senha) => {
     setLoading(true)
+
     try {
       // Faz uma requisição e busca os dados de email e senha
-      let userInfo = await loginUser(email, senha)
+      const response = await api.post("/api/user/login", {
+        email,
+        senha,
+      })
+
+      console.log("Esses são os dados de login", response.data); // Debug
 
       // Coloca os dados dentro de loginDataUser 
-      setLoginDataUser(userInfo)
+      setLoginDataUser(response.data)
 
+      // Salva o token localmente
+      await AsyncStorage.setItem("@userToken", response.data.token)
 
-      console.log("Usuário logado:", userInfo);
+      // Retorna os dados
+      return response.data
 
     } catch (error) {
-      console.log("Erro ao fazer login")
+      console.log("Erro ao fazer login", error.response?.data || error.message);
+      return null;
+    } finally {
       setLoading(false)
     }
   }
 
-  // Chama a função loginUser 
+
+
+  // Função de CRIAR USUÁRIO
   const cadastroNewUser = async (nome, email, senha, telefone) => {
     setLoading(true)
+
     try {
-      let userInfo = await createNewUser(nome, email, senha, telefone)
-      setUserInfo(userInfo)
-      // AsyncStorage.setItem('userInfo', JSON.stringify(userInfo))
-      // setLoading(false)
-      console.log("Novo usuário cadastrado:", userInfo);
+      let response = await api.post("/api/user", {
+        nome,
+        email,
+        senha,
+        telefone,
+      })
+
+      console.log("Esses são os dados do novo usuário", response.data); // Debug
+
+      // Coloca os dados dentro de setUserInfo 
+      setUserInfo(response.data)
+
+      // Retorna os dados do novo usuário para quem chamou a função
+      return response.data
+
     } catch (error) {
       console.log("Erro ao criar usuario")
+    } finally {
       setLoading(false)
     }
   }
