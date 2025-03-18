@@ -12,6 +12,8 @@ const Stack = createNativeStackNavigator()
 
 export const Routes = () => {
   const { userInfo } = useContext(AuthContext)
+  console.log("To mexendo aqui", userInfo);
+
 
   return (
     <NavigationContainer>

@@ -27,8 +27,6 @@ export const AuthProvider = ({ children }) => {
         senha,
       })
 
-      console.log("Esses são os dados de login", response.data); // Debug
-
       // Coloca os dados dentro de loginDataUser 
       setLoginDataUser(response.data)
 
@@ -60,8 +58,6 @@ export const AuthProvider = ({ children }) => {
         telefone,
       })
 
-      console.log("Esses são os dados do novo usuário", response.data); // Debug
-
       // Coloca os dados dentro de setUserInfo 
       setUserInfo(response.data)
 
@@ -74,6 +70,18 @@ export const AuthProvider = ({ children }) => {
       setLoading(false)
     }
   }
+
+  // Funcão de LOGOUT do sistema 
+  const logout = async () => {
+    // Lima o AsyncStorage(remover o token)
+    await AsyncStorage.removeItem("@userToken")
+
+    // Limpa os dados de login e usuário
+    setLoginDataUser({})
+    setUserInfo({})
+
+  }
+
 
   return (
     <AuthContext.Provider value={{
