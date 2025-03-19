@@ -1,15 +1,24 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../contexts/auth';
 import styled from 'styled-components/native'
+import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = () => {
   const { userInfo, loginDataUser, logout } = useContext(AuthContext);
+
+  // Navegação
+  const navigation = useNavigation()
+
+  const userLogout = () => {
+    logout()
+    navigation.navigate("Login")
+  }
 
   return (
     <Container>
       {/* Seção do Perfil */}
       <ProfileContainer>
-        <Avatar source={{ uri: loginDataUser?.avatar || 'https://www.gravatar.com/avatar/12345abcde' }} />
+        <Avatar source={{ uri: loginDataUser?.avatar || 'https://avatars.githubusercontent.com/u/110751484?v=4' }} />
         <UserName>Olá, {userInfo?.nome || loginDataUser?.nome}!</UserName>
         <UserInfo>Email: {userInfo?.email || loginDataUser?.email}</UserInfo>
         <UserInfo>Telefone: {userInfo?.telefone || loginDataUser?.telefone}</UserInfo>
@@ -27,7 +36,7 @@ const HomeScreen = () => {
         <ActionButton>
           <ButtonText>Criar Salão</ButtonText>
         </ActionButton>
-        <ActionButton logout onPress={logout}>
+        <ActionButton logout onPress={userLogout}>
           <ButtonText>Sair</ButtonText>
         </ActionButton>
       </ButtonContainer>

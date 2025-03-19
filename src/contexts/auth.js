@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Para armazenar os dados do token
 import React, { createContext, useEffect, useState } from "react";
 import api from "../services/api"
@@ -14,6 +15,11 @@ export const AuthProvider = ({ children }) => {
   // Carregamento da página
   const [loading, setLoading] = useState(false)
 
+  // Navegação
+  const navigation = useNavigation();
+
+
+
 
 
   // Function de LOGIN do usuario
@@ -27,11 +33,21 @@ export const AuthProvider = ({ children }) => {
         senha,
       })
 
+      console.log(response.data);
+
+
+      // Verifica se os dados do usuario estão vindo corretamente
+      if (!response.data) {
+        console.log("Erro: resposta sem dados");
+      }
+
       // Coloca os dados dentro de loginDataUser 
       setLoginDataUser(response.data)
 
-      // Salva o token localmente
+      // Salva o token do usuário
       await AsyncStorage.setItem("@userToken", response.data.token)
+      // Salva os dados do usuário
+      const userLocalStorage = await AsyncStorage.setItem("@userInfo", JSON.stringify(response.data))
 
       // Retorna os dados
       return response.data
@@ -73,14 +89,41 @@ export const AuthProvider = ({ children }) => {
 
   // Funcão de LOGOUT do sistema 
   const logout = async () => {
-    // Lima o AsyncStorage(remover o token)
-    await AsyncStorage.removeItem("@userToken")
+    try {
+      // Lima o AsyncStorage(remover o token)
+      await AsyncStorage.removeItem("@userToken")
 
-    // Limpa os dados de login e usuário
-    setLoginDataUser({})
-    setUserInfo({})
-
+      // Limpa os dados de login e usuário
+      setLoginDataUser({})
+      setUserInfo({})
+    } catch (error) {
+      console.error("Erro ao sair da conta!", error)
+    }
   }
+
+  // Recupera token do AsyncStorage ao iniciar o app e perciste os dados.
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = await AsyncStorage.getItem("@userToken")
+      const userInfoAsync = await AsyncStorage.getItem("@userInfo")
+
+      console.log("Token recuperado do AsyncStorage", token);
+      console.log("Dados do usuário recuperados do AsyncStorage", userInfoAsync);
+
+      if (token && userInfoAsync) {
+        //Se existir token e os dados do usuário, configura o estado com os dados armazendos.
+        setLoginDataUser({ token })
+        setUserInfo(JSON.parse(userInfoAsync)) // Muda o json de volta pra objeto
+        // Navega para a tela principal (Home)
+        navigation.navigate('Home');
+      } else {
+        // Caso contrário, navega para a tela de Login
+        navigation.navigate('Login');
+      }
+    }
+
+    checkToken()
+  }, []) // Executa uma vez ao iniciar o app
 
 
   return (
@@ -94,7 +137,9 @@ export const AuthProvider = ({ children }) => {
       // Função Login
       login,
       // Dados do novo usuário
-      userInfo
+      userInfo,
+      // Função sair do sistema
+      logout
     }}>
       {children}
     </AuthContext.Provider >

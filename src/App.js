@@ -3,12 +3,15 @@ import { Routes } from './routes/Routes';
 
 // Context
 import { AuthProvider } from './contexts/auth';
+import { NavigationContainer } from '@react-navigation/native';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Routes />
-      <StatusBar style='auto' />
-    </AuthProvider>
+    <NavigationContainer>
+      <AuthProvider>
+        <Routes />
+        <StatusBar style='auto' />
+      </AuthProvider>
+    </NavigationContainer>
   )
 }
