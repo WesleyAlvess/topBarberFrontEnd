@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
 
 
 
-
+  /////////////////////////////////////////////////////
 
   // Function de LOGIN do usuario
   const login = async (email, senha) => {
@@ -33,9 +33,6 @@ export const AuthProvider = ({ children }) => {
         senha,
       })
 
-      console.log(response.data);
-
-
       // Verifica se os dados do usuario estão vindo corretamente
       if (!response.data) {
         console.log("Erro: resposta sem dados");
@@ -47,7 +44,7 @@ export const AuthProvider = ({ children }) => {
       // Salva o token do usuário
       await AsyncStorage.setItem("@userToken", response.data.token)
       // Salva os dados do usuário
-      const userLocalStorage = await AsyncStorage.setItem("@userInfo", JSON.stringify(response.data))
+      await AsyncStorage.setItem("@userInfo", JSON.stringify(response.data))
 
       // Retorna os dados
       return response.data
@@ -60,7 +57,7 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-
+  ///////////////////////////////////////////////////////////
 
   // Função de CRIAR USUÁRIO
   const cadastroNewUser = async (nome, email, senha, telefone) => {
@@ -87,28 +84,60 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+
+  //////////////////////////////////////////////////////////////////
+
+
   // Funcão de LOGOUT do sistema 
   const logout = async () => {
     try {
-      // Lima o AsyncStorage(remover o token)
+      // Limpa o AsyncStorage(remover o token)
       await AsyncStorage.removeItem("@userToken")
 
       // Limpa os dados de login e usuário
       setLoginDataUser({})
       setUserInfo({})
+
+      // Retorna para página de LOGIN
+      navigation.navigate("Login")
+
     } catch (error) {
       console.error("Erro ao sair da conta!", error)
     }
   }
+
+  ////////////////////////////////////////////////////////
+
+  const updateDataPerfil = async (nome, email, telefone) => {
+    try {
+      // // Enviando dados do USUÁRIO para atualização
+      // const response = await api.patch("/api/user/atualizar-perfil", {
+      //   nome,
+      //   email,
+      //   telefone,
+      // })
+
+      // // Verificando se os dados do usuário estão vindo corretamente
+      // if (!response.data) {
+      //   console.log("Erro: resposta sem dados")
+      // }
+
+      // console.log("Esse são os dados que vão ser atualizados", response.data);
+
+      log("Modal Aberto!!")
+
+    } catch (error) {
+      console.error("Erro ao editar perfil", error)
+    }
+  }
+
+  ///////////////////////////////////////////////////////////
 
   // Recupera token do AsyncStorage ao iniciar o app e perciste os dados.
   useEffect(() => {
     const checkToken = async () => {
       const token = await AsyncStorage.getItem("@userToken")
       const userInfoAsync = await AsyncStorage.getItem("@userInfo")
-
-      console.log("Token recuperado do AsyncStorage", token);
-      console.log("Dados do usuário recuperados do AsyncStorage", userInfoAsync);
 
       if (token && userInfoAsync) {
         //Se existir token e os dados do usuário, configura o estado com os dados armazendos.
@@ -139,7 +168,9 @@ export const AuthProvider = ({ children }) => {
       // Dados do novo usuário
       userInfo,
       // Função sair do sistema
-      logout
+      logout,
+      // Atualiza os dados do usuário
+      updateDataPerfil,
     }}>
       {children}
     </AuthContext.Provider >

@@ -1,21 +1,44 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { AuthContext } from '../contexts/auth';
 import styled from 'styled-components/native'
-import { useNavigation } from '@react-navigation/native';
+import ModalEditProfile from '../components/ModalEditProfile';
+
+
 
 const HomeScreen = () => {
-  const { userInfo, loginDataUser, logout } = useContext(AuthContext);
+  // Funções do context
+  const { userInfo, loginDataUser, logout, updateDataPerfil } = useContext(AuthContext);
 
-  // Navegação
-  const navigation = useNavigation()
+  // Armazena o estado de abrir e fechar o modal
+  const [openModalEdit, setOpenModalEdit] = useState(false)
 
-  const userLogout = () => {
-    logout()
-    navigation.navigate("Login")
+  // Estado para armazenar os novos dados 
+  const [nome, setNome] = useState(userInfo?.nome || loginDataUser?.nome);
+  const [email, setEmail] = useState(userInfo?.email || loginDataUser?.email);
+  const [telefone, setTelefone] = useState(userInfo?.telefone || loginDataUser?.telefone);
+  const [foto, setFoto] = useState(userInfo?.avatar || loginDataUser?.avatar);
+
+  const hahandleSave = () => {
+
   }
 
   return (
     <Container>
+      {/* Modal */}
+      {openModalEdit &&
+        < ModalEditProfile
+          nome={nome}
+          setNome={setNome}
+          email={email}
+          setEmail={setEmail}
+          telefone={telefone}
+          setTelefone={setTelefone}
+          foto={foto}
+          setFoto={setFoto}
+          handleSave={handleSave}
+          closeModal={() => setOpenModalEdit(false)}
+        />}
+
       {/* Seção do Perfil */}
       <ProfileContainer>
         <Avatar source={{ uri: loginDataUser?.avatar || 'https://avatars.githubusercontent.com/u/110751484?v=4' }} />
@@ -27,7 +50,7 @@ const HomeScreen = () => {
 
       {/* Botões de Ações */}
       <ButtonContainer>
-        <ActionButton>
+        <ActionButton onPress={() => setOpenModalEdit(true)}>
           <ButtonText>Editar Perfil</ButtonText>
         </ActionButton>
         <ActionButton>
@@ -36,7 +59,7 @@ const HomeScreen = () => {
         <ActionButton>
           <ButtonText>Criar Salão</ButtonText>
         </ActionButton>
-        <ActionButton logout onPress={userLogout}>
+        <ActionButton logout onPress={logout}>
           <ButtonText>Sair</ButtonText>
         </ActionButton>
       </ButtonContainer>
