@@ -16,11 +16,35 @@ const HomeScreen = () => {
   const [nome, setNome] = useState(userInfo?.nome || loginDataUser?.nome);
   const [email, setEmail] = useState(userInfo?.email || loginDataUser?.email);
   const [telefone, setTelefone] = useState(userInfo?.telefone || loginDataUser?.telefone);
-  const [foto, setFoto] = useState(userInfo?.avatar || loginDataUser?.avatar);
+  const [foto, setFoto] = useState(userInfo?.foto || loginDataUser?.foto);
 
-  const hahandleSave = () => {
+  // Função para salvar os dados
+  const handleSave = () => {
+    // Criando um objeto apenas com os dados preenchidos 
+    const updateData = {}
+    // verificando
+    if (nome) updateData.nome = nome
+    if (email) updateData.email = email
+    if (telefone) updateData.telefone = telefone
+    if (foto) updateData.avatar = foto
 
-  }
+    // Verificando se o objeto esta vazio
+    if (Object.keys(updateData).length === 0) {
+      console.log("Nenhum dado foi alterado.");
+      return;
+    }
+
+    // Chama a função updateDataPerfil e passa os daodos pra ela 
+    updateDataPerfil(updateData)
+
+    // Fecha o modal
+    setOpenModalEdit(false)
+
+  };
+
+  // console.log("Dados do userInfo:", userInfo);
+  // console.log("URL da Foto:", userInfo?.foto);
+
 
   return (
     <Container>
@@ -39,9 +63,9 @@ const HomeScreen = () => {
           closeModal={() => setOpenModalEdit(false)}
         />}
 
-      {/* Seção do Perfil */}
+      {/* Seção do Perfil || 'https://avatars.githubusercontent.com/u/110751484?v=4' */}
       <ProfileContainer>
-        <Avatar source={{ uri: loginDataUser?.avatar || 'https://avatars.githubusercontent.com/u/110751484?v=4' }} />
+        <Avatar source={{ uri: userInfo?.foto || loginDataUser?.foto }} />
         <UserName>Olá, {userInfo?.nome || loginDataUser?.nome}!</UserName>
         <UserInfo>Email: {userInfo?.email || loginDataUser?.email}</UserInfo>
         <UserInfo>Telefone: {userInfo?.telefone || loginDataUser?.telefone}</UserInfo>

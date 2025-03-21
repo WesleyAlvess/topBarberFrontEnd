@@ -13,15 +13,9 @@ const ModalEditProfile = ({
   foto,
   setFoto,
   closeModal,
+  handleSave,
 }) => {
 
-
-  const handleSave = () => {
-    // Aqui você pode tratar os dados e chamar uma função de atualização (ex: updateProfile)
-    // onSave({ name, email, phone, photo });]
-    console.log("Esses são os dados do modal", nome, email, telefone, foto);
-
-  };
 
   return (
     <Modal animationType="slide" transparent={true}>

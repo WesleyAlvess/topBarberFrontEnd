@@ -108,23 +108,27 @@ export const AuthProvider = ({ children }) => {
 
   ////////////////////////////////////////////////////////
 
-  const updateDataPerfil = async (nome, email, telefone) => {
+  const updateDataPerfil = async (updateData) => {
     try {
-      // // Enviando dados do USUÁRIO para atualização
-      // const response = await api.patch("/api/user/atualizar-perfil", {
-      //   nome,
-      //   email,
-      //   telefone,
-      // })
+      // Pega o token no AsyncStorage para autenticar
+      const token = await AsyncStorage.getItem("@userToken")
 
-      // // Verificando se os dados do usuário estão vindo corretamente
-      // if (!response.data) {
-      //   console.log("Erro: resposta sem dados")
-      // }
+      console.log("Token recuperado:", token);
 
-      // console.log("Esse são os dados que vão ser atualizados", response.data);
+      // Enviando dados do USUÁRIO para atualização
+      const response = await api.patch("/api/user/atualizar-perfil", updateData, {
+        headers: {
+          Authorization: `Bearer ${token}` // Adicionando o token ao cabeçalho
+        }
+      })
 
-      log("Modal Aberto!!")
+      console.log("Perfil atualizado com sucesso!", response.data); // Debugger
+
+      // Atualiza o estado local com os novos dados
+      setUserInfo({
+        ...userInfo, // Preserva o que não foi alterado
+        ...updateData, // Adiciona os dados novos ao existentes
+      })
 
     } catch (error) {
       console.error("Erro ao editar perfil", error)
