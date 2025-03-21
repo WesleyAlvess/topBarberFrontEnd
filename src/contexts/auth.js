@@ -71,8 +71,18 @@ export const AuthProvider = ({ children }) => {
         telefone,
       })
 
-      // Coloca os dados dentro de setUserInfo 
+      if (!response.data.token) {
+        console.log("Erro: Token não retornado no cadastro.");
+        return null;
+      }
+
+      // Salva o token e os dados do usuário no AsyncStorage
+      await AsyncStorage.setItem("@userToken", response.data.token)
+      await AsyncStorage.setItem("@userInfo", JSON.stringify(response.data))
+
+      // Atualiza o estado GLOBAL do usuário como os dados.
       setUserInfo(response.data)
+      setLoginDataUser(response.data)
 
       // Retorna os dados do novo usuário para quem chamou a função
       return response.data
@@ -129,6 +139,10 @@ export const AuthProvider = ({ children }) => {
         ...userInfo, // Preserva o que não foi alterado
         ...updateData, // Adiciona os dados novos ao existentes
       })
+
+      console.log("Enviando requisição com token:", {
+        Authorization: `Bearer ${token}`
+      });
 
     } catch (error) {
       console.error("Erro ao editar perfil", error)
