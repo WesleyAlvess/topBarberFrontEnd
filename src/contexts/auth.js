@@ -130,18 +130,15 @@ export const AuthProvider = ({ children }) => {
         }
       })
 
-      console.log("Perfil atualizado com sucesso!", response.data); // Debugger
+      // Atualiza o estado e mantém os dados antigos
+      const newUserInfo = {
+        ...userInfo, // Mantém os dados antigos
+        ...response.data // Atualiza os novos dados recebidos
+      }
+      setUserInfo(newUserInfo);
 
-      // Atualiza o estado local com os novos dados
-      setUserInfo({
-        // ...userInfo, // Preserva o que não foi alterado
-        // ...updateData, // Adiciona os dados novos ao existentes
-        ...response.data // Utiliza a resposta da API para garantir que todos os dados estão atualizados
-      })
-
-      console.log("Enviando requisição com token:", {
-        Authorization: `Bearer ${token}`
-      });
+      // Atualiza os dados no AsyncStorage para manter após recarregar
+      await AsyncStorage.setItem("@userInfo", JSON.stringify(newUserInfo))
 
     } catch (error) {
       console.error("Erro ao editar perfil", error)

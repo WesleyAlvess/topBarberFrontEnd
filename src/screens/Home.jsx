@@ -65,7 +65,7 @@ const HomeScreen = () => {
         <UserName>Olá, {userInfo?.nome || loginDataUser?.nome}!</UserName>
         <UserInfo>Email: {userInfo?.email || loginDataUser?.email}</UserInfo>
         <UserInfo>Telefone: {userInfo?.telefone || loginDataUser?.telefone}</UserInfo>
-        <UserInfo>Status: {userInfo?.status || loginDataUser?.status}</UserInfo>
+        <UserInfo>Perfil: {userInfo?.tipo || loginDataUser?.tipo}</UserInfo>
       </ProfileContainer>
 
       {/* Botões de Ações */}
