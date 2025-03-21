@@ -6,8 +6,6 @@ import styled from 'styled-components/native';
 const ModalEditProfile = ({
   nome,
   setNome,
-  email,
-  setEmail,
   telefone,
   setTelefone,
   foto,
@@ -25,12 +23,6 @@ const ModalEditProfile = ({
             placeholder="Nome"
             value={nome}
             onChangeText={setNome}
-          />
-          <Input
-            placeholder="E-mail"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
           />
           <Input
             placeholder="Telefone"

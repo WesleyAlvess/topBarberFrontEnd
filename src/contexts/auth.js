@@ -123,8 +123,6 @@ export const AuthProvider = ({ children }) => {
       // Pega o token no AsyncStorage para autenticar
       const token = await AsyncStorage.getItem("@userToken")
 
-      console.log("Token recuperado:", token);
-
       // Enviando dados do USUÁRIO para atualização
       const response = await api.patch("/api/user/atualizar-perfil", updateData, {
         headers: {
@@ -136,8 +134,9 @@ export const AuthProvider = ({ children }) => {
 
       // Atualiza o estado local com os novos dados
       setUserInfo({
-        ...userInfo, // Preserva o que não foi alterado
-        ...updateData, // Adiciona os dados novos ao existentes
+        // ...userInfo, // Preserva o que não foi alterado
+        // ...updateData, // Adiciona os dados novos ao existentes
+        ...response.data // Utiliza a resposta da API para garantir que todos os dados estão atualizados
       })
 
       console.log("Enviando requisição com token:", {

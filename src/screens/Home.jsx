@@ -14,7 +14,6 @@ const HomeScreen = () => {
 
   // Estado para armazenar os novos dados 
   const [nome, setNome] = useState(userInfo?.nome || loginDataUser?.nome);
-  const [email, setEmail] = useState(userInfo?.email || loginDataUser?.email);
   const [telefone, setTelefone] = useState(userInfo?.telefone || loginDataUser?.telefone);
   const [foto, setFoto] = useState(userInfo?.foto || loginDataUser?.foto);
 
@@ -24,9 +23,8 @@ const HomeScreen = () => {
     const updateData = {}
     // verificando
     if (nome) updateData.nome = nome
-    if (email) updateData.email = email
     if (telefone) updateData.telefone = telefone
-    if (foto) updateData.avatar = foto
+    if (foto) updateData.foto = foto
 
     // Verificando se o objeto esta vazio
     if (Object.keys(updateData).length === 0) {
@@ -53,8 +51,6 @@ const HomeScreen = () => {
         < ModalEditProfile
           nome={nome}
           setNome={setNome}
-          email={email}
-          setEmail={setEmail}
           telefone={telefone}
           setTelefone={setTelefone}
           foto={foto}
@@ -63,7 +59,7 @@ const HomeScreen = () => {
           closeModal={() => setOpenModalEdit(false)}
         />}
 
-      {/* Seção do Perfil || 'https://avatars.githubusercontent.com/u/110751484?v=4' */}
+      {/* Seção do Perfil */}
       <ProfileContainer>
         <Avatar source={{ uri: userInfo?.foto || loginDataUser?.foto }} />
         <UserName>Olá, {userInfo?.nome || loginDataUser?.nome}!</UserName>
@@ -112,6 +108,7 @@ const Avatar = styled.Image`
   height: 100px;
   border-radius: 50px;
   margin-bottom: 10px;
+  border: 1.8px solid #3b3b3b;
 `;
 
 const UserName = styled.Text`
