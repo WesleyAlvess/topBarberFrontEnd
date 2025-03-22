@@ -40,8 +40,8 @@ const HomeScreen = () => {
 
   };
 
-  // console.log("Dados do userInfo:", userInfo);
-  // console.log("URL da Foto:", userInfo?.foto);
+  // Definir uma imagem padrão
+  const imagePadraoPerfil = "https://ui-avatars.com/api/?name=Wesley+Pereira&background=80382b&color=fff"
 
 
   return (
@@ -61,7 +61,7 @@ const HomeScreen = () => {
 
       {/* Seção do Perfil */}
       <ProfileContainer>
-        <Avatar source={{ uri: userInfo?.foto || loginDataUser?.foto }} />
+        <Avatar source={{ uri: foto || userInfo?.foto || loginDataUser?.foto || imagePadraoPerfil, }} />
         <UserName>Olá, {userInfo?.nome || loginDataUser?.nome}!</UserName>
         <UserInfo>Email: {userInfo?.email || loginDataUser?.email}</UserInfo>
         <UserInfo>Telefone: {userInfo?.telefone || loginDataUser?.telefone}</UserInfo>
