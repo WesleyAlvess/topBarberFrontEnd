@@ -17,14 +17,6 @@ const HomeSalaoScreen = () => {
   const [enderecoSalão, setEnderecoSalão] = useState('');
   const [fotoSalão, setFotoSalão] = useState('');
 
-  useEffect(() => {
-    if (salao) {
-      setNomeSalão(salao.nome);
-      setEnderecoSalão(salao.endereco);
-      setFotoSalão(salao.foto || 'URL default'); // Adicione um valor default caso não tenha foto
-    }
-  }, [salao]);
-
   return (
     <Container>
       {/* Seção do Perfil do Salão */}

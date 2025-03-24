@@ -188,6 +188,8 @@ export const AuthProvider = ({ children }) => {
       login,
       // Dados do novo usuário
       userInfo,
+      // Função setUserInfo
+      setUserInfo,
       // Função sair do sistema
       logout,
       // Atualiza os dados do usuário
