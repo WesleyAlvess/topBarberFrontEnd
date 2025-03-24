@@ -2,10 +2,14 @@ import React, { useContext, useState } from 'react';
 import { AuthContext } from '../contexts/auth';
 import styled from 'styled-components/native'
 import ModalEditProfile from '../components/ModalEditProfile';
+import { useNavigation } from '@react-navigation/native';
 
 
 
 const HomeScreen = () => {
+  // Navegação
+  const navigation = useNavigation()
+
   // Funções do context
   const { userInfo, loginDataUser, logout, updateDataPerfil } = useContext(AuthContext);
 
@@ -40,10 +44,6 @@ const HomeScreen = () => {
 
   };
 
-  // console.log("Dados do userInfo:", userInfo);
-  // console.log("URL da Foto:", userInfo?.foto);
-
-
   return (
     <Container>
       {/* Modal */}
@@ -76,7 +76,7 @@ const HomeScreen = () => {
         <ActionButton>
           <ButtonText>Agendar</ButtonText>
         </ActionButton>
-        <ActionButton>
+        <ActionButton onPress={() => navigation.navigate("CadastroSalao")}>
           <ButtonText>Criar Salão</ButtonText>
         </ActionButton>
         <ActionButton logout onPress={logout}>
