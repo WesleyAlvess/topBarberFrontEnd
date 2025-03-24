@@ -69,12 +69,19 @@ export const AuthProvider = ({ children }) => {
         email,
         senha,
         telefone,
+        foto: "https://robohash.org/wesley",
       })
 
       if (!response.data.token) {
         console.log("Erro: Token não retornado no cadastro.");
         return null;
       }
+
+      console.log(response.data);
+
+
+      // Limpa qualquer dado anterior do AsyncStorage
+      await AsyncStorage.removeItem("@userInfo")
 
       // Salva o token e os dados do usuário no AsyncStorage
       await AsyncStorage.setItem("@userToken", response.data.token)
@@ -133,11 +140,11 @@ export const AuthProvider = ({ children }) => {
       // Atualiza o estado e mantém os dados antigos
       const newUserInfo = {
         ...userInfo, // Mantém os dados antigos
-        ...response.data // Atualiza os novos dados recebidos
+        ...response.data, // Atualiza os novos dados recebidos
       }
       setUserInfo(newUserInfo);
 
-      // Atualiza os dados no AsyncStorage para manter após recarregar
+      // Atualiza os dados no AsyncStorage  
       await AsyncStorage.setItem("@userInfo", JSON.stringify(newUserInfo))
 
     } catch (error) {

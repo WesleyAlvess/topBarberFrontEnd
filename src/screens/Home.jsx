@@ -44,6 +44,10 @@ const HomeScreen = () => {
 
   };
 
+  // console.log("Dados do userInfo:", userInfo);
+  // console.log("URL da Foto:", userInfo?.foto);
+
+
   return (
     <Container>
       {/* Modal */}
@@ -61,7 +65,7 @@ const HomeScreen = () => {
 
       {/* Seção do Perfil */}
       <ProfileContainer>
-        <Avatar source={{ uri: userInfo?.foto || loginDataUser?.foto }} />
+        <Avatar source={{ uri: foto || userInfo?.foto || loginDataUser?.foto || imagePadraoPerfil, }} />
         <UserName>Olá, {userInfo?.nome || loginDataUser?.nome}!</UserName>
         <UserInfo>Email: {userInfo?.email || loginDataUser?.email}</UserInfo>
         <UserInfo>Telefone: {userInfo?.telefone || loginDataUser?.telefone}</UserInfo>
