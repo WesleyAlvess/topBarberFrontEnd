@@ -77,9 +77,6 @@ export const AuthProvider = ({ children }) => {
         return null;
       }
 
-      console.log(response.data);
-
-
       // Limpa qualquer dado anterior do AsyncStorage
       await AsyncStorage.removeItem("@userInfo")
 

@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../contexts/auth';
+import { SalaoContext } from '../contexts/salaoContext'
 import styled from 'styled-components/native'
 import ModalEditProfile from '../components/ModalEditProfile';
 import { useNavigation } from '@react-navigation/native';
@@ -12,6 +13,7 @@ const HomeScreen = () => {
 
   // Funções do context
   const { userInfo, loginDataUser, logout, updateDataPerfil } = useContext(AuthContext);
+  const { salaoExiste } = useContext(SalaoContext); // Verifica se o usuário já tem um salão
 
   // Armazena o estado de abrir e fechar o modal
   const [openModalEdit, setOpenModalEdit] = useState(false)
@@ -44,8 +46,6 @@ const HomeScreen = () => {
 
   };
 
-  // console.log("Dados do userInfo:", userInfo);
-  // console.log("URL da Foto:", userInfo?.foto);
 
 
   return (
@@ -80,14 +80,15 @@ const HomeScreen = () => {
         <ActionButton>
           <ButtonText>Agendar</ButtonText>
         </ActionButton>
-        <ActionButton onPress={() => navigation.navigate("CadastroSalao")}>
-          <ButtonText>Criar Salão</ButtonText>
+        {/* Se o usuário já tem um salão, mostra "Meu Salão", senão "Criar Salão" */}
+        <ActionButton onPress={() => navigation.navigate(salaoExiste ? "HomeSalao" : "CadastroSalao")}>
+          <ButtonText>{salaoExiste ? "Meu Salão" : "Criar Salão"}</ButtonText>
         </ActionButton>
         <ActionButton logout onPress={logout}>
           <ButtonText>Sair</ButtonText>
         </ActionButton>
       </ButtonContainer>
-    </Container>
+    </Container >
   );
 };
 
