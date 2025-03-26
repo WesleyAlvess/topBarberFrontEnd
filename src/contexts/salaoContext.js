@@ -1,6 +1,4 @@
-import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Para armazenar os dados do token
-import { Alert } from 'react-native';
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "./auth"; // Para pegar os dados do usuário autenticado
 import api from "../services/api"
@@ -8,115 +6,82 @@ import api from "../services/api"
 export const SalaoContext = createContext({})
 
 export const SalaoProvider = ({ children }) => {
-  const navigation = useNavigation() // Navegação
-  const { userInfo, setUserInfo } = useContext(AuthContext) // Pegando os dados do usuário logado
-  const [loading, setLoading] = useState(false)
-  const [salaoExiste, setSalaoExiste] = useState(null);
-  const [salaoInfo, setSalaoInfo] = useState(null); // Estado para armazenar os dados do salão
+  // Funções do context
+  const { userInfo, setUserInfo } = useContext(AuthContext);
+  const [salao, setSalao] = useState(null) // Armazena se o usuário tem ou não um Salão
+  const [infoSalao, setInfoSalao] = useState({})
 
-  const verificaSeTemSalao = async () => {
-    setLoading(true);
+  // Verifica se o salão existe quando o componente for montado
+  const verificaSalao = async () => {
     try {
-      // Pegando token do usuario
+      //Pegar o token que vem de usuario
       const token = await AsyncStorage.getItem("@userToken")
+      const dataUser = await AsyncStorage.getItem("@userInfo")
 
-      // Fazendo requisição e enviando o token de autenticação no header
-      const response = await api.get("api/verificar-salao", {
+      if (!token) {
+        return false // Se não houver token, não tem salão
+      }
+
+      // Faz a requisição para o backend
+      const response = await api.get('/api/verificar-salao', {
         headers: { Authorization: `Bearer ${token}` }
       })
 
-      // Se houver um salão, salvar os dados no estado e no AsyncStorage
-      if (response.data) {
-        setSalaoExiste(true)
-        setSalaoInfo(response.data)
-        await AsyncStorage.setItem("@salaoInfo", JSON.stringify(response.data)) // Salvando os dados do salão no Async
-      } else {
-        setSalaoExiste(false)
-        setSalaoInfo(null)
-        await AsyncStorage.removeItem("@salaoInfo"); // Remove caso não tenha um salão
+      // Verifica se a resposta indica que o usuário já tem um salão
+      if (response === true) {
+        setSalao(false) // Não permite a criação pois o usuario ja tem um salao
+        return false
       }
 
-      // Verifica se o perfil e de cliente ou profissional
-      if (response.data.tipo === cliente) {
-        setSalaoExiste(false)
-        setSalaoInfo(null)
-        await AsyncStorage.removeItem("@salaoInfo"); // Remove caso não tenha um salão
-      } else {
-        setSalaoExiste(true)
-        setSalaoInfo(response.data)
-        await AsyncStorage.setItem("@salaoInfo", JSON.stringify(response.data)) // Salvando os dados do salão no Async
+      if (response === false) {
+        setSalao(true) // Permite o usuario criar um salao
+        return true
       }
+
+      setUserInfo(dataUser)
 
     } catch (error) {
-      if (error.response || error.response.status === 400) {
-        setSalaoExiste(true); // Já possui um salão
-      } else {
-        console.error("Erro ao verificar salão:", error);
-      }
-    } finally {
-      setLoading(false)
+      console.error("Erro ao verificar salão:", error);
     }
+
   }
 
-  // Chama a verificação ao abrir o app
-  useEffect(() => {
-    verificaSeTemSalao()
-  }, [])
-
-  // Função para buscar os dados do salão do usuario logado
+  // Cria salão
   const criarSalao = async (dadosSalao) => {
-    setLoading(true)
-
-    // Verifica se o usuário já tem um salão antes de criar
-    await verificaSeTemSalao()
-
-    if (salaoExiste) {
-      setLoading(false);
-      navigation.navigate("HomeSalao")
-      return;
-    }
-
     try {
-      // Pega o token do usuário no AsyncStorage
-      const token = await AsyncStorage.getItem("@userToken");
+      // Pegar o token do usuário
+      const token = await AsyncStorage.getItem("@userToken")
 
-      // Envia os dados para a API
-      const response = await api.post("api/", dadosSalao, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // Verificar se o token existe
+      if (!token) {
+        console.error("Token não encontrado");
+        return
+      }
 
-      // Atualiza o estado e salva os dados no AsyncStorage
-      setSalaoExiste(true)
-      setSalaoInfo(response.data)
-      await AsyncStorage.setItem("@salaoInfo", JSON.stringify(response.data))
+      // Fazer a requicição para o backend, mandando o token no cabeçalho
+      const response = await api.post("/api", dadosSalao, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
 
-      Alert.alert("Sucesso", "Salão criado com sucesso!");
-      navigation.navigate("HomeSalao"); // Redireciona para a tela do salão
+      // Atualizar o estado armazenando as informações do salão
+      setInfoSalao(response.data)
+
+      // Retornar o salao criado
+      return response.data
 
     } catch (error) {
-      console.error("Erro ao criar salão:", error);
-      Alert.alert("Erro", "Não foi possível criar o salão.");
-    } finally {
-      setLoading(false);
+      console.error("Erro ao criar Salão", error)
     }
   }
 
   return (
     <SalaoContext.Provider value={{
-      // Função de criar salão
+      salao,
+      setSalao,
+      verificaSalao,
       criarSalao,
-      // Carregamento
-      loading,
-      // Função para armazendar true ou false ou null se o usuário tem um salão
-      verificaSeTemSalao,
-      // Estado contendo os dados boleanos 
-      salaoExiste,
-      // Contém os dados do salão
-      salaoInfo,
     }}
-    >
-      {children}
-    </SalaoContext.Provider>
+    >{children}</SalaoContext.Provider>
   )
 
 }

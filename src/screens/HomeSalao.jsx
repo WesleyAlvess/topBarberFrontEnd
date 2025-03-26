@@ -1,41 +1,28 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { AuthContext } from '../contexts/auth';
 import styled from 'styled-components/native';
-import { useNavigation } from '@react-navigation/native';
-import { SalaoContext } from '../contexts/salaoContext';
+
 
 const HomeSalaoScreen = () => {
-  // Navegação
-  const navigation = useNavigation();
-
-  // Funções do context
-  const { userInfo } = useContext(AuthContext);
-  const { salao } = useContext(SalaoContext);
-
-  // Estado para exibir dados do salão
-  const [nomeSalão, setNomeSalão] = useState('');
-  const [enderecoSalão, setEnderecoSalão] = useState('');
-  const [fotoSalão, setFotoSalão] = useState('');
 
   return (
     <Container>
       {/* Seção do Perfil do Salão */}
       <ProfileContainer>
-        <Avatar source={{ uri: fotoSalão }} />
-        <SalãoName>{nomeSalão}</SalãoName>
-        <SalãoInfo>Endereço: {enderecoSalão}</SalãoInfo>
-        <SalãoInfo>Perfil: {userInfo?.tipo || 'Profissional'}</SalãoInfo>
+        <Avatar source={{ uri: "https://robohash.org/wesley" }} />
+        <SalãoName>Nome do Salão</SalãoName>
+        <SalãoInfo>Endereço: ...</SalãoInfo>
+        <SalãoInfo>Perfil: ...</SalãoInfo>
       </ProfileContainer>
 
       {/* Botões de Ações */}
       <ButtonContainer>
-        <ActionButton onPress={() => navigation.navigate("CriarServico")}>
+        <ActionButton>
           <ButtonText>Criar Serviço</ButtonText>
         </ActionButton>
-        <ActionButton onPress={() => navigation.navigate("CriarHorario")}>
+        <ActionButton>
           <ButtonText>Criar Horário</ButtonText>
         </ActionButton>
-        <ActionButton onPress={() => navigation.navigate("Agendamentos")}>
+        <ActionButton>
           <ButtonText>Agendamentos</ButtonText>
         </ActionButton>
       </ButtonContainer>

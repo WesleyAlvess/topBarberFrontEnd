@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../contexts/auth';
 import { SalaoContext } from '../contexts/salaoContext'
 import styled from 'styled-components/native'
@@ -13,7 +13,7 @@ const HomeScreen = () => {
 
   // Funções do context
   const { userInfo, loginDataUser, logout, updateDataPerfil } = useContext(AuthContext);
-  const { salaoExiste } = useContext(SalaoContext); // Verifica se o usuário já tem um salão
+  const { salao, setSalao, verificaSalao } = useContext(SalaoContext); // Verifica se o usuário já tem um salão
 
   // Armazena o estado de abrir e fechar o modal
   const [openModalEdit, setOpenModalEdit] = useState(false)
@@ -45,6 +45,22 @@ const HomeScreen = () => {
     setOpenModalEdit(false)
 
   };
+
+  // Função criar salão
+  const CriarSalao = async () => {
+    // Chama a função para verificar se o salão existe
+    const temSalao = await verificaSalao();
+
+    // Verifica o estado do salão
+    if (!temSalao) {
+      // Se não houver salão, navega para o cadastro do salão
+      navigation.navigate("CadastroSalao");
+    } else {
+      // Se já existir salão, navega para a home do salão
+      navigation.navigate("HomeSalao");
+    }
+
+  }
 
 
 
@@ -81,8 +97,8 @@ const HomeScreen = () => {
           <ButtonText>Agendar</ButtonText>
         </ActionButton>
         {/* Se o usuário já tem um salão, mostra "Meu Salão", senão "Criar Salão" */}
-        <ActionButton onPress={() => navigation.navigate(salaoExiste ? "HomeSalao" : "CadastroSalao")}>
-          <ButtonText>{salaoExiste ? "Meu Salão" : "Criar Salão"}</ButtonText>
+        <ActionButton onPress={CriarSalao}>
+          <ButtonText>{!setSalao ? "Meu Salão" : "Criar Salão"}</ButtonText>
         </ActionButton>
         <ActionButton logout onPress={logout}>
           <ButtonText>Sair</ButtonText>

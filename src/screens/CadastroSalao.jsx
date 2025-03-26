@@ -21,7 +21,15 @@ const CadastroSalaoScreen = () => {
       nome,
       endereco,
     };
-    await criarSalao(dadosSalao)
+    const response = await criarSalao(dadosSalao)
+
+    if (response) {
+      console.log(response);
+      navigation.navigate("HomeSalao");
+    } else {
+      console.error("Erro ao criar salão.");
+    }
+
   };
 
   return (
