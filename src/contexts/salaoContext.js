@@ -7,19 +7,32 @@ export const SalaoContext = createContext({})
 
 export const SalaoProvider = ({ children }) => {
   // Funções do context
-  const { userInfo, setUserInfo } = useContext(AuthContext);
   const [salao, setSalao] = useState(null) // Armazena se o usuário tem ou não um Salão
-  const [infoSalao, setInfoSalao] = useState({})
+  const [userInfo, setUserInfo] = useState(null); // Armazena os dados do usuário
 
-  // Verifica se o salão existe quando o componente for montado
+  // Salva Token e dados do usuário
+  const salvaTokenAndDataUser = async (token, userInfo) => {
+    await AsyncStorage.setItem("@userToken", token)
+    await AsyncStorage.setItem("@userInfo", JSON.stringify(userInfo))
+    setUserInfo(userInfo);
+  }
+
+  // Remove token e dados do usuario
+  const removeTokenAndDataUser = async () => {
+    await AsyncStorage.removeItem("@userToken");
+    await AsyncStorage.removeItem("@userInfo");
+    setUserInfo(null);
+    setSalao(null)
+  }
+
+  // Verifica se o usuário tem um salão
   const verificaSalao = async () => {
     try {
       //Pegar o token que vem de usuario
       const token = await AsyncStorage.getItem("@userToken")
-      const dataUser = await AsyncStorage.getItem("@userInfo")
 
       if (!token) {
-        return false // Se não houver token, não tem salão
+        return false; // Se não houver token, retorna falso
       }
 
       // Faz a requisição para o backend
@@ -27,21 +40,18 @@ export const SalaoProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` }
       })
 
-      // Verifica se a resposta indica que o usuário já tem um salão
-      if (response === true) {
-        setSalao(false) // Não permite a criação pois o usuario ja tem um salao
-        return false
+      // verificação
+      if (response.data.temSalao) {
+        setSalao(true); // Usuário já tem salão
+        return true;
+      } else {
+        setSalao(false); // Usuário não tem salão
+        return false;
       }
-
-      if (response === false) {
-        setSalao(true) // Permite o usuario criar um salao
-        return true
-      }
-
-      setUserInfo(dataUser)
 
     } catch (error) {
       console.error("Erro ao verificar salão:", error);
+      return false;
     }
 
   }
@@ -63,8 +73,7 @@ export const SalaoProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` }
       })
 
-      // Atualizar o estado armazenando as informações do salão
-      setInfoSalao(response.data)
+      setSalao(response.data); // Atualiza o estado do salão
 
       // Retornar o salao criado
       return response.data

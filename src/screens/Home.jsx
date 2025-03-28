@@ -12,16 +12,16 @@ const HomeScreen = () => {
   const navigation = useNavigation()
 
   // Funções do context
-  const { userInfo, loginDataUser, logout, updateDataPerfil } = useContext(AuthContext);
+  const { user, logout, updateDataPerfil } = useContext(AuthContext);
   const { salao, setSalao, verificaSalao } = useContext(SalaoContext); // Verifica se o usuário já tem um salão
 
   // Armazena o estado de abrir e fechar o modal
   const [openModalEdit, setOpenModalEdit] = useState(false)
 
   // Estado para armazenar os novos dados 
-  const [nome, setNome] = useState(userInfo?.nome || loginDataUser?.nome);
-  const [telefone, setTelefone] = useState(userInfo?.telefone || loginDataUser?.telefone);
-  const [foto, setFoto] = useState(userInfo?.foto || loginDataUser?.foto);
+  const [nome, setNome] = useState(user?.nome);
+  const [telefone, setTelefone] = useState(user?.telefone);
+  const [foto, setFoto] = useState(user?.foto);
 
   // Função para salvar os dados
   const handleSave = () => {
@@ -81,11 +81,11 @@ const HomeScreen = () => {
 
       {/* Seção do Perfil */}
       <ProfileContainer>
-        <Avatar source={{ uri: foto || userInfo?.foto || loginDataUser?.foto || imagePadraoPerfil, }} />
-        <UserName>Olá, {userInfo?.nome || loginDataUser?.nome}!</UserName>
-        <UserInfo>Email: {userInfo?.email || loginDataUser?.email}</UserInfo>
-        <UserInfo>Telefone: {userInfo?.telefone || loginDataUser?.telefone}</UserInfo>
-        <UserInfo>Perfil: {userInfo?.tipo || loginDataUser?.tipo}</UserInfo>
+        <Avatar source={{ uri: foto || user?.foto }} />
+        <UserName>Olá, {user?.nome}!</UserName>
+        <UserInfo>Email: {user?.email}</UserInfo>
+        <UserInfo>Telefone: {user?.telefone}</UserInfo>
+        <UserInfo>Perfil: {user?.tipo}</UserInfo>
       </ProfileContainer>
 
       {/* Botões de Ações */}

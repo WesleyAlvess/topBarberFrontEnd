@@ -1,16 +1,14 @@
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Para armazenar os dados do token
 import React, { createContext, useEffect, useState } from "react";
+import { Alert } from "react-native";
 import api from "../services/api"
 
 export const AuthContext = createContext({})
 
 export const AuthProvider = ({ children }) => {
-  // Armazena dados do CADASTRO do novo usuário
-  const [userInfo, setUserInfo] = useState({})
-
-  // Armazena dados do LOGIN do usuário
-  const [loginDataUser, setLoginDataUser] = useState({})
+  // Armazena os dados do USUÁRIO
+  const [user, setUser] = useState(null)
 
   // Carregamento da página
   const [loading, setLoading] = useState(false)
@@ -19,8 +17,20 @@ export const AuthProvider = ({ children }) => {
   const navigation = useNavigation();
 
 
-
   /////////////////////////////////////////////////////
+
+  // Salva token e dados do usuario
+  const salvaTokenAndDataUser = async (token, userInfo) => {
+    await AsyncStorage.setItem("@userToken", token)
+    await AsyncStorage.setItem("@userInfo", JSON.stringify(userInfo))
+  }
+
+  //Remove token e dados do usuario
+  const removeTokenAndDataUser = async () => {
+    await AsyncStorage.removeItem("@userToken");
+    await AsyncStorage.removeItem("@userInfo");
+  }
+
 
   // Function de LOGIN do usuario
   const login = async (email, senha) => {
@@ -35,16 +45,15 @@ export const AuthProvider = ({ children }) => {
 
       // Verifica se os dados do usuario estão vindo corretamente
       if (!response.data) {
-        console.log("Erro: resposta sem dados");
+        Alert.alert("Erro: resposta sem dados");
+        return null
       }
 
       // Coloca os dados dentro de loginDataUser 
-      setLoginDataUser(response.data)
+      setUser(response.data)
 
       // Salva o token do usuário
-      await AsyncStorage.setItem("@userToken", response.data.token)
-      // Salva os dados do usuário
-      await AsyncStorage.setItem("@userInfo", JSON.stringify(response.data))
+      await salvaTokenAndDataUser(response.data.token, response.data)
 
       // Retorna os dados
       return response.data
@@ -57,7 +66,9 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+
   ///////////////////////////////////////////////////////////
+
 
   // Função de CRIAR USUÁRIO
   const cadastroNewUser = async (nome, email, senha, telefone) => {
@@ -73,20 +84,18 @@ export const AuthProvider = ({ children }) => {
       })
 
       if (!response.data.token) {
-        console.log("Erro: Token não retornado no cadastro.");
+        Alert.alert("Erro: Token não retornado no cadastro.");
         return null;
       }
 
       // Limpa qualquer dado anterior do AsyncStorage
-      await AsyncStorage.removeItem("@userInfo")
+      await removeTokenAndDataUser(response.data.token, response.data)
 
       // Salva o token e os dados do usuário no AsyncStorage
-      await AsyncStorage.setItem("@userToken", response.data.token)
-      await AsyncStorage.setItem("@userInfo", JSON.stringify(response.data))
+      await salvaTokenAndDataUser(response.data.token, response.data)
 
-      // Atualiza o estado GLOBAL do usuário como os dados.
-      setUserInfo(response.data)
-      setLoginDataUser(response.data)
+      // Atualiza o estado do usuário com os dados recebidos
+      setUser(response.data)
 
       // Retorna os dados do novo usuário para quem chamou a função
       return response.data
@@ -109,11 +118,12 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.removeItem("@userToken")
 
       // Limpa os dados de login e usuário
-      setLoginDataUser({})
-      setUserInfo({})
+      setUser(null)
 
       // Retorna para página de LOGIN
       navigation.navigate("Login")
+
+      Alert.alert("Você saiu da sua conta")
 
     } catch (error) {
       console.error("Erro ao sair da conta!", error)
@@ -134,15 +144,15 @@ export const AuthProvider = ({ children }) => {
         }
       })
 
-      // Atualiza o estado e mantém os dados antigos
+      // Atualiza o estado com os novos dados
       const newUserInfo = {
-        ...userInfo, // Mantém os dados antigos
+        ...user, // Mantém os dados antigos
         ...response.data, // Atualiza os novos dados recebidos
       }
-      setUserInfo(newUserInfo);
+      setUser(newUserInfo);
 
       // Atualiza os dados no AsyncStorage  
-      await AsyncStorage.setItem("@userInfo", JSON.stringify(newUserInfo))
+      await salvaTokenAndDataUser(token, newUserInfo)
 
     } catch (error) {
       console.error("Erro ao editar perfil", error)
@@ -151,17 +161,14 @@ export const AuthProvider = ({ children }) => {
 
   ///////////////////////////////////////////////////////////
 
-  // Recupera token do AsyncStorage ao iniciar o app e perciste os dados.
+  // Recupera token do AsyncStorage ao iniciar o app e persiste os dados.
   useEffect(() => {
     const checkToken = async () => {
       const token = await AsyncStorage.getItem("@userToken")
       const userInfoAsync = await AsyncStorage.getItem("@userInfo")
 
       if (token && userInfoAsync) {
-        //Se existir token e os dados do usuário, configura o estado com os dados armazendos.
-        setLoginDataUser({ token })
-        setUserInfo(JSON.parse(userInfoAsync)) // Muda o json de volta pra objeto
-        // Navega para a tela principal (Home)
+        setUser(JSON.parse(userInfoAsync)) // Configura o estado com os dados armazenados
         navigation.navigate('Home');
       } else {
         // Caso contrário, navega para a tela de Login
@@ -172,24 +179,25 @@ export const AuthProvider = ({ children }) => {
     checkToken()
   }, []) // Executa uma vez ao iniciar o app
 
+  // Atualiza o ESTADO no AsyncStorage sempre que o usuario mudar
+  useEffect(() => {
+    const updateUserInfoStorage = async () => {
+      if (user) {
+        await salvaTokenAndDataUser(user.token, user)
+      }
+    }
+    updateUserInfoStorage()
+  }, [user]) // Executa sempre que user mudar
+
 
   return (
     <AuthContext.Provider value={{
-      // Spinner de carregamento
       loading,
-      // Função Cadastro
       cadastroNewUser,
-      // Dados do login do usuário
-      loginDataUser,
-      // Função Login
       login,
-      // Dados do novo usuário
-      userInfo,
-      // Função setUserInfo
-      setUserInfo,
-      // Função sair do sistema
+      user, // Retorna o estado único do usuário
+      setUser,
       logout,
-      // Atualiza os dados do usuário
       updateDataPerfil,
     }}>
       {children}
