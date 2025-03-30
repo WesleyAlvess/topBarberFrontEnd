@@ -1,59 +1,49 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Para armazenar os dados do token
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, use, useContext, useEffect, useState } from "react";
 import { AuthContext } from "./auth"; // Para pegar os dados do usuário autenticado
 import api from "../services/api"
 
 export const SalaoContext = createContext({})
 
 export const SalaoProvider = ({ children }) => {
-  // Funções do context
-  const [salao, setSalao] = useState(null) // Armazena se o usuário tem ou não um Salão
-  const [userInfo, setUserInfo] = useState(null); // Armazena os dados do usuário
+  const { user, setUser } = useContext(AuthContext);
 
-  // Salva Token e dados do usuário
-  const salvaTokenAndDataUser = async (token, userInfo) => {
-    await AsyncStorage.setItem("@userToken", token)
-    await AsyncStorage.setItem("@userInfo", JSON.stringify(userInfo))
-    setUserInfo(userInfo);
-  }
+  const [temSalao, setTemSalao] = useState(null) // Armazena true ou false se o usuario tem um salao
+  const [dadosDoSalao, setDadosDoSalao] = useState(null) // Armazena dados do salao
 
-  // Remove token e dados do usuario
-  const removeTokenAndDataUser = async () => {
-    await AsyncStorage.removeItem("@userToken");
-    await AsyncStorage.removeItem("@userInfo");
-    setUserInfo(null);
-    setSalao(null)
-  }
 
-  // Verifica se o usuário tem um salão
-  const verificaSalao = async () => {
+  // ✅ Busca os dados do salão do usuário autenticado
+  const buscarSalao = async () => {
     try {
-      //Pegar o token que vem de usuario
-      const token = await AsyncStorage.getItem("@userToken")
+      const token = await AsyncStorage.getItem("@userToken");
 
       if (!token) {
-        return false; // Se não houver token, retorna falso
+        console.error("Token não encontrado");
+        return;
       }
 
-      // Faz a requisição para o backend
-      const response = await api.get('/api/verificar-salao', {
+      // Verifica se o usuário possui tipo profissional
+      if (user?.tipo !== 'profissional') {
+        console.log("Usuário não é um profissional");
+        setTemSalao(false)
+        return
+      }
+
+      const response = await api.get("/api/salao", {
         headers: { Authorization: `Bearer ${token}` }
       })
 
-      // verificação
-      if (response.data.temSalao) {
-        setSalao(true); // Usuário já tem salão
-        return true;
+      if (response.data) {
+        setDadosDoSalao(response.data)
+        setTemSalao(true)
       } else {
-        setSalao(false); // Usuário não tem salão
-        return false;
+        setTemSalao(false)
       }
 
     } catch (error) {
-      console.error("Erro ao verificar salão:", error);
-      return false;
+      console.error("Erro ao buscar salão:", error);
+      setTemSalao(false);
     }
-
   }
 
   // Cria salão
@@ -61,6 +51,7 @@ export const SalaoProvider = ({ children }) => {
     try {
       // Pegar o token do usuário
       const token = await AsyncStorage.getItem("@userToken")
+      console.log("Token recuperado:", token)
 
       // Verificar se o token existe
       if (!token) {
@@ -68,12 +59,25 @@ export const SalaoProvider = ({ children }) => {
         return
       }
 
-      // Fazer a requicição para o backend, mandando o token no cabeçalho
+      // Fazer a requizição para o backend, mandando o token no cabeçalho
       const response = await api.post("/api", dadosSalao, {
         headers: { Authorization: `Bearer ${token}` }
       })
 
-      setSalao(response.data); // Atualiza o estado do salão
+      console.log("Salão criado:", response.data);
+
+      // Atualiza o usuário no contexto para refletir que ele agora é um profissional
+      setUser((prevUser) => ({
+        ...prevUser,
+        tipo: "profissional",
+      }));
+
+      setTemSalao(true);
+      setDadosDoSalao(response.data)
+
+      // ✅ Atualiza os dados do salão chamando `buscarSalao()`
+      await buscarSalao();
+
 
       // Retornar o salao criado
       return response.data
@@ -83,12 +87,18 @@ export const SalaoProvider = ({ children }) => {
     }
   }
 
+  useEffect(() => {
+
+
+  }, [user])
+
   return (
     <SalaoContext.Provider value={{
-      salao,
-      setSalao,
-      verificaSalao,
+      temSalao,
+      setTemSalao,
+      buscarSalao,
       criarSalao,
+      dadosDoSalao,
     }}
     >{children}</SalaoContext.Provider>
   )

@@ -13,7 +13,7 @@ const HomeScreen = () => {
 
   // Funções do context
   const { user, logout, updateDataPerfil } = useContext(AuthContext);
-  const { salao, setSalao, verificaSalao } = useContext(SalaoContext); // Verifica se o usuário já tem um salão
+  const { buscarSalao, temSalao } = useContext(SalaoContext); // Verifica se o usuário já tem um salão
 
   // Armazena o estado de abrir e fechar o modal
   const [openModalEdit, setOpenModalEdit] = useState(false)
@@ -49,15 +49,16 @@ const HomeScreen = () => {
   // Função criar salão
   const CriarSalao = async () => {
     // Chama a função para verificar se o salão existe
-    const temSalao = await verificaSalao();
+    await buscarSalao();
 
     // Verifica o estado do salão
-    if (!temSalao) {
-      // Se não houver salão, navega para o cadastro do salão
-      navigation.navigate("CadastroSalao");
-    } else {
+    if (user?.tipo === "profissional") {
       // Se já existir salão, navega para a home do salão
       navigation.navigate("HomeSalao");
+
+    } else {
+      // Se não houver salão, navega para o cadastro do salão
+      navigation.navigate("CadastroSalao");
     }
 
   }
@@ -98,7 +99,7 @@ const HomeScreen = () => {
         </ActionButton>
         {/* Se o usuário já tem um salão, mostra "Meu Salão", senão "Criar Salão" */}
         <ActionButton onPress={CriarSalao}>
-          <ButtonText>{!setSalao ? "Meu Salão" : "Criar Salão"}</ButtonText>
+          <ButtonText>{user?.tipo === "profissional" ? "Meu Salão" : "Criar Salão"}</ButtonText>
         </ActionButton>
         <ActionButton logout onPress={logout}>
           <ButtonText>Sair</ButtonText>

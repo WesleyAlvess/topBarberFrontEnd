@@ -21,13 +21,13 @@ const CadastroSalaoScreen = () => {
       nome,
       endereco,
     };
-    const response = await criarSalao(dadosSalao)
+    const salaoInfo = await criarSalao(dadosSalao)
 
-    if (response) {
-      console.log(response);
+    if (salaoInfo) {
       navigation.navigate("HomeSalao");
+
     } else {
-      console.error("Erro ao criar salão.");
+      Alert.alert("Erro ao criar salão.");
     }
 
   };
@@ -45,7 +45,7 @@ const CadastroSalaoScreen = () => {
 
         {/* Botão de Criar Salão */}
         <SignUpButton onPress={handleSignUp}>
-          <ButtonText>Criar Salão</ButtonText>
+          <ButtonText>Cadastrar informações</ButtonText>
         </SignUpButton>
       </InputWrapper>
     </Container>

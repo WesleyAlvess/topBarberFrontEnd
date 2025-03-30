@@ -1,17 +1,23 @@
 import React, { useContext, useState, useEffect } from 'react';
 import styled from 'styled-components/native';
+import { SalaoContext } from '../contexts/salaoContext'
+import { AuthContext } from '../contexts/auth';
 
 
 const HomeSalaoScreen = () => {
+  // Context
+  const { loading, dadosDoSalao } = useContext(SalaoContext);
+  const { user } = useContext(AuthContext);
 
   return (
     <Container>
       {/* Seção do Perfil do Salão */}
       <ProfileContainer>
         <Avatar source={{ uri: "https://robohash.org/wesley" }} />
-        <SalãoName>Nome do Salão</SalãoName>
-        <SalãoInfo>Endereço: ...</SalãoInfo>
-        <SalãoInfo>Perfil: ...</SalãoInfo>
+        <SalãoName>{dadosDoSalao?.nome}</SalãoName>
+        <SalãoInfo>Dono: {user.nome}</SalãoInfo>
+        <SalãoInfo>Telefone: {user.telefone}</SalãoInfo>
+        <SalãoInfo>Endereço: {dadosDoSalao.endereco}</SalãoInfo>
       </ProfileContainer>
 
       {/* Botões de Ações */}

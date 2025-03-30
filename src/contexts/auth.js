@@ -19,18 +19,20 @@ export const AuthProvider = ({ children }) => {
 
   /////////////////////////////////////////////////////
 
-  // Salva token e dados do usuario
+
+  // Salva Token e dados do usuário
   const salvaTokenAndDataUser = async (token, userInfo) => {
     await AsyncStorage.setItem("@userToken", token)
     await AsyncStorage.setItem("@userInfo", JSON.stringify(userInfo))
+    setUser(userInfo);
   }
 
-  //Remove token e dados do usuario
+  // Remove token e dados do usuario
   const removeTokenAndDataUser = async () => {
     await AsyncStorage.removeItem("@userToken");
     await AsyncStorage.removeItem("@userInfo");
+    setUser(null);
   }
-
 
   // Function de LOGIN do usuario
   const login = async (email, senha) => {
