@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage"; // Para ar
 import React, { createContext, use, useContext, useEffect, useState } from "react";
 import { AuthContext } from "./auth"; // Para pegar os dados do usuário autenticado
 import api from "../services/api"
+import { jwtDecode } from "jwt-decode";
 
 export const SalaoContext = createContext({})
 
@@ -87,10 +88,41 @@ export const SalaoProvider = ({ children }) => {
     }
   }
 
-  useEffect(() => {
+  const adicionarServico = async (dataServico) => {
+    try {
+      // Pegando o token do usuário no Local Storage
+      const token = await AsyncStorage.getItem("@userToken")
+
+      // Verificando se tem token
+      if (!token) {
+        console.error("Token não encontrado");
+        return;
+      }
+
+      // Decodificando o token para pegar o ID do usuário
+      const decodedToken = jwtDecode(token)
+      // Pegando ID do usuario no token 
+      const salaoId = decodedToken.dono
+
+      const response = await api.post(`/api/services/${salaoId}`, dataServico, {
+        headers: { Authorization: `Bearer ${token}` } // Incluindo o token no cabeçalho
+      })
+
+      console.log(response.data);
 
 
-  }, [user])
+      // // Verificando a resposta da API
+      // if (response.status === 201) {
+      //   return response.data
+      // } else {
+      //   console.error("Erro ao criar serviço")
+      // }
+
+    } catch (error) {
+      console.error("Erro ao criar Serviço", error)
+    }
+  }
+
 
   return (
     <SalaoContext.Provider value={{
@@ -99,6 +131,7 @@ export const SalaoProvider = ({ children }) => {
       buscarSalao,
       criarSalao,
       dadosDoSalao,
+      adicionarServico,
     }}
     >{children}</SalaoContext.Provider>
   )
