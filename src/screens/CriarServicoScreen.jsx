@@ -2,15 +2,16 @@ import React, { useState, useContext } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import { SalaoContext } from '../contexts/salaoContext';
-import { Alert } from 'react-native';
+import { Alert, Text } from 'react-native';
 
 const CriarServicoScreen = () => {
   const navigation = useNavigation(); // Hook de navegação
-  const { adicionarServico } = useContext(SalaoContext); // Context Salao
+  const { adicionarServico, servicos } = useContext(SalaoContext); // Context Salao
 
   const [titulo, setTitulo] = useState('');
   const [preco, setPreco] = useState('');
   const [duracao, setDuracao] = useState('');
+
 
   const handleCriarServico = async () => {
     const dataServico = {
@@ -25,9 +26,10 @@ const CriarServicoScreen = () => {
 
       // Verifica se a resposta da criação foi bem-sucedida
       if (response) {
-        navigation.navigate("HomeSalao"); // Voltar para a Home do Salão
+        Alert.alert("Serviço criado com sucesso!")
+        console.log("Serviços no estado:", servicos);
       } else {
-        Alert.alert("Erro ao criar serviço")
+        Alert.alert("Erro ao criar serviço!")
       }
 
     } catch (error) {
@@ -44,6 +46,16 @@ const CriarServicoScreen = () => {
       <Button onPress={handleCriarServico}>
         <ButtonText>Salvar Serviço</ButtonText>
       </Button>
+      {/* Listar serviços */}
+      {Array.isArray(servicos) && servicos.length > 0 ? (
+        servicos.map((servico) => (
+          <ServicoItem key={servico._id}>
+            <Text>{servico.titulo} - R$ {servico.preco} - {servico.duracao} min</Text>
+          </ServicoItem>
+        ))
+      ) : (
+        <Text>Nenhum serviço cadastrado.</Text>
+      )}
     </Container>
   );
 };
@@ -79,3 +91,18 @@ const ButtonText = styled.Text`
   font-size: 16px;
   font-weight: bold;
 `;
+
+const ContainerServices = styled.View`
+  background-color: gray;
+`;
+
+const ServicoItem = styled.View`
+  width: 90%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+  align-items: center;
+`;
+

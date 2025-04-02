@@ -1,8 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Para armazenar os dados do token
-import React, { createContext, use, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "./auth"; // Para pegar os dados do usuário autenticado
 import api from "../services/api"
-import { jwtDecode } from "jwt-decode";
 
 export const SalaoContext = createContext({})
 
@@ -11,6 +10,7 @@ export const SalaoProvider = ({ children }) => {
 
   const [temSalao, setTemSalao] = useState(null) // Armazena true ou false se o usuario tem um salao
   const [dadosDoSalao, setDadosDoSalao] = useState(null) // Armazena dados do salao
+  const [servicos, setServicos] = useState([]) // Armazenar dados do serviço
 
 
   // ✅ Busca os dados do salão do usuário autenticado
@@ -78,6 +78,7 @@ export const SalaoProvider = ({ children }) => {
 
       // ✅ Atualiza os dados do salão chamando `buscarSalao()`
       await buscarSalao();
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
 
       // Retornar o salao criado
@@ -88,40 +89,38 @@ export const SalaoProvider = ({ children }) => {
     }
   }
 
+  // Criar Serveço
   const adicionarServico = async (dataServico) => {
     try {
-      // Pegando o token do usuário no Local Storage
-      const token = await AsyncStorage.getItem("@userToken")
-
-      // Verificando se tem token
+      const token = await AsyncStorage.getItem("@userToken");
       if (!token) {
         console.error("Token não encontrado");
         return;
       }
 
-      // Decodificando o token para pegar o ID do usuário
-      const decodedToken = jwtDecode(token)
-      // Pegando ID do usuario no token 
-      const salaoId = decodedToken.dono
+      if (!dadosDoSalao || !dadosDoSalao._id) {
+        console.error("Erro: ID do salão não encontrado.");
+        return;
+      }
 
-      const response = await api.post(`/api/services/${salaoId}`, dataServico, {
-        headers: { Authorization: `Bearer ${token}` } // Incluindo o token no cabeçalho
-      })
+      const response = await api.post(`/api/services/${dadosDoSalao._id}`, dataServico, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      console.log(response.data);
+      // Se o serviço foi criado com sucesso, atualiza a lista
+      if (response.status === 201) {
+        setServicos((prevServicos) => [...prevServicos, response.data]); // Atualiza a lista de serviços
+        return response.data;
+      }
 
-
-      // // Verificando a resposta da API
-      // if (response.status === 201) {
-      //   return response.data
-      // } else {
-      //   console.error("Erro ao criar serviço")
-      // }
-
+      if (response.status === 400) {
+        console.log("Já existe este serviço no seu salão");
+      }
     } catch (error) {
-      console.error("Erro ao criar Serviço", error)
+      console.error("Erro ao criar Serviço", error);
     }
-  }
+  };
+
 
 
   return (
@@ -132,6 +131,8 @@ export const SalaoProvider = ({ children }) => {
       criarSalao,
       dadosDoSalao,
       adicionarServico,
+      setServicos,
+      servicos,
     }}
     >{children}</SalaoContext.Provider>
   )
