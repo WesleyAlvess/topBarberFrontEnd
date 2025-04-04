@@ -48,11 +48,13 @@ const CriarServicoScreen = () => {
       </Button>
       {/* Listar serviços */}
       {Array.isArray(servicos) && servicos.length > 0 ? (
-        servicos.map((servico) => (
-          <ServicoItem key={servico._id}>
-            <Text>{servico.titulo} - R$ {servico.preco} - {servico.duracao} min</Text>
-          </ServicoItem>
-        ))
+        servicos
+          .filter(servico => servico._id) // Remove itens sem ID
+          .map((servico) => (
+            <ServicoItem key={servico._id}>
+              <Text>{servico.titulo} - R$ {servico.preco} - {servico.duracao} min</Text>
+            </ServicoItem>
+          ))
       ) : (
         <Text>Nenhum serviço cadastrado.</Text>
       )}
@@ -84,6 +86,7 @@ const Button = styled.TouchableOpacity`
   background-color: #80382b;
   border-radius: 8px;
   align-items: center;
+  margin-bottom: 20px;
 `;
 
 const ButtonText = styled.Text`

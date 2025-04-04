@@ -109,6 +109,7 @@ export const SalaoProvider = ({ children }) => {
 
       // Se o serviço foi criado com sucesso, atualiza a lista
       if (response.status === 201) {
+        await buscarServicos()
         setServicos((prevServicos) => [...prevServicos, response.data]); // Atualiza a lista de serviços
         return response.data;
       }
@@ -121,6 +122,44 @@ export const SalaoProvider = ({ children }) => {
     }
   };
 
+  // Buscar servico
+  const buscarServicos = async () => {
+    try {
+      const token = await AsyncStorage.getItem("@userToken");
+
+      if (!token) {
+        console.error("Token não encontrado");
+        return;
+      }
+
+      if (!dadosDoSalao || !dadosDoSalao._id) {
+        console.error("Erro: ID do salão não encontrado.");
+        return;
+      }
+
+      const response = await api.get(`/api/services/${dadosDoSalao._id}/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setServicos(response.data); // Atualiza os serviços corretamente
+
+
+    } catch (error) {
+      console.error("Erro ao buscar serviços:", error);
+    }
+  }
+
+  // Carrega os dados ao montar o componente
+  useEffect(() => {
+    buscarSalao();
+  }, []);
+
+  // Carrega os serviços apenas quando os dados do salão forem carregados
+  useEffect(() => {
+    if (dadosDoSalao?._id) {
+      buscarServicos();
+    }
+  }, [dadosDoSalao]);
 
 
   return (
