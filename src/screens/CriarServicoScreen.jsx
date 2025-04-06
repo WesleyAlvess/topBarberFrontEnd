@@ -3,10 +3,13 @@ import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import { SalaoContext } from '../contexts/salaoContext';
 import { Alert, Text } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
+import Toast from 'react-native-toast-message';
+
 
 const CriarServicoScreen = () => {
   const navigation = useNavigation(); // Hook de navegação
-  const { adicionarServico, servicos } = useContext(SalaoContext); // Context Salao
+  const { adicionarServico, servicos, excluirServico } = useContext(SalaoContext); // Context Salao
 
   const [titulo, setTitulo] = useState('');
   const [preco, setPreco] = useState('');
@@ -20,20 +23,47 @@ const CriarServicoScreen = () => {
       duracao,
     }
 
+    // Validando campos
+    if (!titulo || !preco || !duracao) {
+      Toast.show({
+        type: 'info',
+        text1: 'Por favor, preencha todos os campos.',
+      });
+      return;
+    }
+
     try {
       // Espera o retorno de adicionarServico
       const response = await adicionarServico(dataServico)
 
       // Verifica se a resposta da criação foi bem-sucedida
-      if (response) {
-        Alert.alert("Serviço criado com sucesso!")
-        console.log("Serviços no estado:", servicos);
+      if (response === 'success') {
+        Toast.show({
+          type: 'success',
+          text1: 'Serviço criado com sucesso',
+        })
+        // Limpa os campos após o successo
+        setTitulo('')
+        setPreco('')
+        setDuracao('')
+      } else if (response === 'exists') {
+        Toast.show({
+          type: 'error',
+          text1: 'Já existe este serviço no seu salão'
+        })
       } else {
-        Alert.alert("Erro ao criar serviço!")
+        Toast.show({
+          type: 'info',
+          text1: 'Por favor preencha os campos',
+        })
       }
 
     } catch (error) {
-      Alert.alert("Erro ao criar serviço", error.message || "Tente novamente mais tarde.");
+      Toast.show({
+        type: 'error',
+        text1: 'Erro inesperado!',
+        text2: error.message || 'Tente novamente mais tarde.',
+      });
     }
 
   };
@@ -44,7 +74,7 @@ const CriarServicoScreen = () => {
       <Input placeholder="Preço" value={preco} onChangeText={setPreco} keyboardType="numeric" />
       <Input placeholder="Duração" value={duracao} onChangeText={setDuracao} keyboardType="numeric" />
       <Button onPress={handleCriarServico}>
-        <ButtonText>Salvar Serviço</ButtonText>
+        <ButtonText>Criar Serviço</ButtonText>
       </Button>
       {/* Listar serviços */}
       {Array.isArray(servicos) && servicos.length > 0 ? (
@@ -53,6 +83,9 @@ const CriarServicoScreen = () => {
           .map((servico) => (
             <ServicoItem key={servico._id}>
               <Text>{servico.titulo} - R$ {servico.preco} - {servico.duracao} min</Text>
+              <DeleteButton onPress={() => excluirServico(servico._id)} >
+                <Icon name="trash-2" size={20} color="#b00000" />
+              </DeleteButton>
             </ServicoItem>
           ))
       ) : (
@@ -95,10 +128,6 @@ const ButtonText = styled.Text`
   font-weight: bold;
 `;
 
-const ContainerServices = styled.View`
-  background-color: gray;
-`;
-
 const ServicoItem = styled.View`
   width: 90%;
   padding: 10px;
@@ -107,5 +136,11 @@ const ServicoItem = styled.View`
   margin-bottom: 10px;
   background-color: #f9f9f9;
   align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
+const DeleteButton = styled.TouchableOpacity`
+  margin-left: 10px;
 `;
 

@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage"; // Para ar
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "./auth"; // Para pegar os dados do usuário autenticado
 import api from "../services/api"
+import Toast from 'react-native-toast-message';
 
 export const SalaoContext = createContext({})
 
@@ -65,7 +66,6 @@ export const SalaoProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` }
       })
 
-      console.log("Salão criado:", response.data);
 
       // Atualiza o usuário no contexto para refletir que ele agora é um profissional
       setUser((prevUser) => ({
@@ -111,19 +111,24 @@ export const SalaoProvider = ({ children }) => {
       if (response.status === 201) {
         await buscarServicos()
         setServicos((prevServicos) => [...prevServicos, response.data]); // Atualiza a lista de serviços
-        return response.data;
+        return 'success';
       }
 
       if (response.status === 400) {
-        console.log("Já existe este serviço no seu salão");
+        return 'exists';
       }
+
+      return 'error';
+
     } catch (error) {
       console.error("Erro ao criar Serviço", error);
+      return 'error';
     }
   };
 
   // Buscar servico
   const buscarServicos = async () => {
+
     try {
       const token = await AsyncStorage.getItem("@userToken");
 
@@ -146,6 +151,44 @@ export const SalaoProvider = ({ children }) => {
 
     } catch (error) {
       console.error("Erro ao buscar serviços:", error);
+    }
+  }
+
+  const excluirServico = async (idServico) => {
+    try {
+      // Pegando token do usuario
+      const token = await AsyncStorage.getItem("@userToken")
+
+      // Verificando o token
+      if (!token) {
+        console.error("Token não encontrado");
+        return
+      }
+
+      // Buscando servico no banco de dados 
+      const response = await api.delete(`/api/services/${dadosDoSalao._id}/${idServico}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      console.log(response.data);
+      // Atualiza o estado dos sevicos mostrado na tela
+
+      if (response.status === 200) {
+        Toast.show({
+          type: 'success',
+          text1: 'Serviço excluído com sucesso'
+        })
+        // Atualiza a lista
+        buscarServicos()
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Erro ao excluir serviço'
+        })
+      }
+
+    } catch (error) {
+      console.error("Erro ao excluir serviço", error)
     }
   }
 
@@ -172,6 +215,7 @@ export const SalaoProvider = ({ children }) => {
       adicionarServico,
       setServicos,
       servicos,
+      excluirServico,
     }}
     >{children}</SalaoContext.Provider>
   )
