@@ -89,7 +89,7 @@ export const SalaoProvider = ({ children }) => {
     }
   }
 
-  // Criar Serveço
+  // Criar Serviço
   const adicionarServico = async (dataServico) => {
     try {
       const token = await AsyncStorage.getItem("@userToken");
@@ -126,9 +126,8 @@ export const SalaoProvider = ({ children }) => {
     }
   };
 
-  // Buscar servico
+  // Buscar Servico
   const buscarServicos = async () => {
-
     try {
       const token = await AsyncStorage.getItem("@userToken");
 
@@ -154,6 +153,7 @@ export const SalaoProvider = ({ children }) => {
     }
   }
 
+  // Excluir Serviços
   const excluirServico = async (idServico) => {
     try {
       // Pegando token do usuario
@@ -189,6 +189,15 @@ export const SalaoProvider = ({ children }) => {
 
     } catch (error) {
       console.error("Erro ao excluir serviço", error)
+    }
+  }
+
+  // Criar Horários disponíveis
+  const criarHorario = async () => {
+    try {
+
+    } catch (error) {
+      console.error("Erro ao criar um horário")
     }
   }
 
