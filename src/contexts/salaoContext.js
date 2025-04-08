@@ -193,8 +193,9 @@ export const SalaoProvider = ({ children }) => {
   }
 
   // Criar Horários disponíveis
-  const criarHorario = async () => {
+  const criarHorario = async (diasSelecionados, horariosSelecionados) => {
     try {
+      console.log(diasSelecionados, horariosSelecionados);
 
     } catch (error) {
       console.error("Erro ao criar um horário")
@@ -225,6 +226,7 @@ export const SalaoProvider = ({ children }) => {
       setServicos,
       servicos,
       excluirServico,
+      criarHorario,
     }}
     >{children}</SalaoContext.Provider>
   )
