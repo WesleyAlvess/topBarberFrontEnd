@@ -193,12 +193,43 @@ export const SalaoProvider = ({ children }) => {
   }
 
   // Criar Horários disponíveis
-  const criarHorario = async (diasSelecionados, horariosSelecionados) => {
+  const criarHorario = async (dias) => {
     try {
-      console.log(diasSelecionados, horariosSelecionados);
+      console.log("Dias selecionados:", dias);
+
+      const token = await AsyncStorage.getItem("@userToken");
+      if (!token) {
+        console.error("Token não encontrado");
+        return;
+      }
+
+      if (!dadosDoSalao?._id) {
+        console.error("ID do salão não encontrado");
+        return;
+      }
+
+      // Mapear os horários pro formato esperado
+      const diasFormatados = dias.map((dia) => ({
+        ...dia,
+        horarios: dia.horarios.map((h) => ({
+          hora: h,
+        }))
+      }));
+
+      const response = await api.post(
+        `/api/time/${dadosDoSalao._id}`,
+        { dias: diasFormatados },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      console.log("Resposta da API:", response.data);
 
     } catch (error) {
-      console.error("Erro ao criar um horário")
+      console.error("Erro ao criar um horário:", error.response?.data || error.message);
     }
   }
 

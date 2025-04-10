@@ -1,10 +1,10 @@
 import React, { useState, useContext } from 'react';
 import styled from 'styled-components/native';
-import { ScrollView, TouchableOpacity, Text, Alert } from 'react-native';
+import { ScrollView, TouchableOpacity, Text, View } from 'react-native';
 import { SalaoContext } from '../contexts/salaoContext';
 import Toast from 'react-native-toast-message';
 
-// Array com dias da semana
+// Criei o array Dias da semana
 const diasDaSemana = [
   { nome: 'Domingo', valor: 0 },
   { nome: 'Segunda', valor: 1 },
@@ -13,9 +13,9 @@ const diasDaSemana = [
   { nome: 'Quinta', valor: 4 },
   { nome: 'Sexta', valor: 5 },
   { nome: 'Sábado', valor: 6 },
-]
+];
 
-// Horários disponíveis
+// Criei o array Horários disponíveis
 const horariosDisponiveis = [
   "00:00", "00:30", "01:00", "01:30", "02:00", "02:30", "03:00", "03:30",
   "04:00", "04:30", "05:00", "05:30", "06:00", "06:30", "07:00", "07:30",
@@ -26,86 +26,134 @@ const horariosDisponiveis = [
 ];
 
 const CriarHorarioScreen = () => {
-  // Context Salão
+  // Context
   const { criarHorario } = useContext(SalaoContext);
 
-  // Estados 
-  const [diasSelecionados, setDiasSelecionados] = useState([]);
-  const [horariosSelecionados, setHorariosSelecionados] = useState([]);
+  // Estado de dias
+  const [dias, setDias] = useState(
+    diasDaSemana.map((dia) => ({
+      dia: dia.valor,
+      fechado: true,
+      horarios: [],
+    }))
+  )
 
-  // Função para alternar a seleção de dias
-  const toggleDia = (valor) => {
-    setDiasSelecionados((prev) =>
-      prev.includes(valor)
-        ? prev.filter((d) => d !== valor)
-        : [...prev, valor]
-    )
-  };
+  // Função que alterna entre Fechado/Aberto
+  const toggleFechado = (diaIndex) => {
+    // Atualiza os dias
+    setDias((diasAnteriores) => {
+      // Mapeia todos os dias
+      return diasAnteriores.map((dia, index) => {
+        // Se for o dia que o usuário clicou
+        if (index === diaIndex) {
+          // Se o dia estava fechado, vamos abrir (e manter a lista de horários vazia)
+          // Se o dia estava aberto, vamos fechar e limpar os horários
+          const novoStatus = !dia.fechado
 
-  // Função para alternar a seleção de horários
-  const toggleHorario = (hora) => {
-    setHorariosSelecionados((prev) =>
-      prev.includes(hora)
-        ? prev.filter((h) => h !== hora)
-        : [...prev, hora]
-    )
-  };
+          return {
+            ...dia, // copia as outras infos do dia
+            fechado: novoStatus,
+            horarios: novoStatus ? [] : dia.horarios
+          }
+        } else {
+          // Se não for o dia clicado, retorna o dia igual
+          return dia
+        }
 
-  // Função que monta o payload e envia para o backend
-  const salvarHorario = () => {
-    // Verifica se o usuário escolheu pelo menos um dia e um horário
-    if (diasDaSemana.length === 0 || horariosSelecionados.length === 0) {
-      Toast.show({
-        type: 'info',
-        text1: 'Selecione pelo menos um dia e um horário'
       })
-      return
-    }
-
-    // Chama a função do contexto
-    criarHorario(diasSelecionados, horariosSelecionados)
-    Toast.show({
-      type: 'success',
-      text1: 'Horários definidos com sucesso'
     })
   };
 
+  // Função para adicionar ou remover horários
+  const toggleHorario = (hora, diaIndex) => {
+    // Atualiza a lista de dias
+    setDias((diasAnteriores) => {
+      // Mapeia os dias para criar uma nova lista
+      return diasAnteriores.map((dia, index) => {
+        // Verifica se esse é o dia que foi clicado
+        if (index === diaIndex) {
+          // Verifica se o horário já está na lista
+          const horarioExiste = dia.horarios.includes(hora)
+
+          let novaListaHorarios
+
+          if (horarioExiste) {
+            // Remove o horário da lista
+            novaListaHorarios = dia.horarios.filter((h) => h !== hora)
+          } else {
+            // Adiciona o novo horário à lista
+            novaListaHorarios = [...dia.horarios, hora]
+          }
+          // Retorna o novo objeto do dia com a lista atualizada
+          return {
+            ...dia,
+            horarios: novaListaHorarios
+          }
+        }
+        // Se não for o dia clicado, retorna o dia original
+        return dia
+      })
+    })
+  }
+
+  // Envia dados para o backend
+  const salvarHorario = () => {
+    const diasAtivos = dias.filter((dia) => !dia.fechado && dia.horarios.length > 0)
+
+    if (diasAtivos.length === 0) {
+      Toast.show({
+        type: 'info',
+        text1: 'Selecione pelo menos um dia com horários',
+      });
+      return;
+    }
+
+    // Passa dados para Context
+    criarHorario(dias)
+    Toast.show({
+      type: 'success',
+      text1: 'Horários definidos com sucesso!',
+    });
+
+  }
+
   return (
     <Container>
-      <Titulo>Selecionar dias da semana</Titulo>
-      <Row>
-        {diasDaSemana.map((dia) => (
-          <DiaButton
-            key={dia.valor}
-            selected={diasSelecionados.includes(dia.valor)}
-            onPress={() => toggleDia(dia.valor)}
-          >
-            <Text style={{ color: diasSelecionados.includes(dia.valor) ? "#fff" : "#aaaaa" }} >{dia.nome.substring(0, 3)}</Text>
-          </DiaButton>
-        ))}
-      </Row>
-
-      <Titulo>Selecionar horários disponíveis</Titulo>
       <ScrollView>
-        {horariosDisponiveis.map((hora) => (
-          <HorarioButton
-            key={hora}
-            selected={horariosSelecionados.includes(hora)}
-            onPress={() => toggleHorario(hora)}
-          >
-            <Text style={{ color: horariosSelecionados.includes(hora) ? "#fff" : "#000000aaa" }} >{hora}</Text>
-          </HorarioButton>
+        {dias.map((dia, index) => (
+          <View key={dia.dia}>
+            <Text>{diasDaSemana[index].nome}</Text>
+
+            <FechadoButton onPress={() => toggleFechado(index)} fechado={dia.fechado}>
+              <Text style={{ color: "#fff" }}>{dia.fechado ? 'Fechado' : 'Aberto'}</Text>
+            </FechadoButton>
+
+            {!dia.fechado && (
+              <HorariosContainer>
+                {horariosDisponiveis.map((hora) => (
+                  <HorarioButton
+                    key={hora}
+                    selected={dia.horarios.includes(hora)}
+                    onPress={() => toggleHorario(hora, index)}
+                  >
+                    <Text style={{ color: dia.horarios.includes(hora) ? '#fff' : '#000', fontSize: 12, }}>
+                      {hora}
+                    </Text>
+                  </HorarioButton>
+                ))}
+              </HorariosContainer>
+            )}
+          </View>
         ))}
+        <BotaoSalvar onPress={salvarHorario}>
+          <Text style={{ color: '#fff', fontSize: 16 }}>Salvar Horários</Text>
+        </BotaoSalvar>
       </ScrollView>
-
-      <BotaoSalvar onPress={salvarHorario}>
-        <Text style={{ color: '#fff' }}>Salvar Horários</Text>
-      </BotaoSalvar>
     </Container>
-  );
-};
+  )
+}
 
-export default CriarHorarioScreen;
+export default CriarHorarioScreen
 
 // Styled Components
 const Container = styled.View`
@@ -115,26 +163,29 @@ const Container = styled.View`
 
 const Titulo = styled.Text`
   font-size: 18px;
-  margin: 16px 0 8px;
+  margin-top: 16px;
+  margin-bottom: 8px;
 `;
 
-const Row = styled.View`
+const FechadoButton = styled.TouchableOpacity`
+  background-color: ${({ fechado }) => (fechado ? '#4a4949' : '#58be58')};
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+`;
+
+const HorariosContainer = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
-`;
-
-const DiaButton = styled.TouchableOpacity`
-  background-color: ${({ selected }) => (selected ? '#3366cc' : '#ccc')};
-  padding: 8px;
-  margin: 4px;
-  border-radius: 8px;
+  margin-bottom: 12px;
 `;
 
 const HorarioButton = styled.TouchableOpacity`
-  background-color: ${({ selected }) => (selected ? '#00aa66' : '#ccc')};
-  padding: 10px;
-  margin-vertical: 4px;
-  border-radius: 8px;
+  background-color: ${({ selected }) => (selected ? '#007bff' : '#ccc')};
+  padding: 6px 10px;
+  margin: 4px;
+  border-radius: 6px;
 `;
 
 const BotaoSalvar = styled.TouchableOpacity`
@@ -144,3 +195,4 @@ const BotaoSalvar = styled.TouchableOpacity`
   align-items: center;
   margin-top: 20px;
 `;
+
