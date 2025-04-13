@@ -4,6 +4,7 @@ import { SalaoContext } from '../contexts/salaoContext'
 import styled from 'styled-components/native'
 import ModalEditProfile from '../components/ModalEditProfile';
 import { useNavigation } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 
 
@@ -44,6 +45,11 @@ const HomeScreen = () => {
     // Fecha o modal
     setOpenModalEdit(false)
 
+    Toast.show({
+      type: 'success',
+      text1: 'Dados atualizados com sucesso'
+    })
+
   };
 
   // Função criar salão
@@ -56,9 +62,19 @@ const HomeScreen = () => {
       // Se já existir salão, navega para a home do salão
       navigation.navigate("HomeSalao");
 
+      // Menssagem de sucesso
+      Toast.show({
+        type: 'success',
+        text1: 'Você está conectado ao seu Salão'
+      })
+
     } else {
       // Se não houver salão, navega para o cadastro do salão
       navigation.navigate("CadastroSalao");
+      Toast.show({
+        type: 'info',
+        text1: 'Crie seu Salão'
+      })
     }
 
   }

@@ -12,6 +12,7 @@ export const SalaoProvider = ({ children }) => {
   const [temSalao, setTemSalao] = useState(null) // Armazena true ou false se o usuario tem um salao
   const [dadosDoSalao, setDadosDoSalao] = useState(null) // Armazena dados do salao
   const [servicos, setServicos] = useState([]) // Armazenar dados do serviço
+  const [horarios, setHorarios] = useState([]) // Armazena os dados dos horários
 
 
   // ✅ Busca os dados do salão do usuário autenticado
@@ -20,7 +21,7 @@ export const SalaoProvider = ({ children }) => {
       const token = await AsyncStorage.getItem("@userToken");
 
       if (!token) {
-        console.error("Token não encontrado");
+        console.log("Token não encontrado");
         return;
       }
 
@@ -43,7 +44,7 @@ export const SalaoProvider = ({ children }) => {
       }
 
     } catch (error) {
-      console.error("Erro ao buscar salão:", error);
+      console.log("Erro ao buscar salão:", error);
       setTemSalao(false);
     }
   }
@@ -53,7 +54,6 @@ export const SalaoProvider = ({ children }) => {
     try {
       // Pegar o token do usuário
       const token = await AsyncStorage.getItem("@userToken")
-      console.log("Token recuperado:", token)
 
       // Verificar se o token existe
       if (!token) {
@@ -170,7 +170,6 @@ export const SalaoProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       })
 
-      console.log(response.data);
       // Atualiza o estado dos sevicos mostrado na tela
 
       if (response.status === 200) {
@@ -195,8 +194,6 @@ export const SalaoProvider = ({ children }) => {
   // Criar Horários disponíveis
   const criarHorario = async (dias) => {
     try {
-      console.log("Dias selecionados:", dias);
-
       const token = await AsyncStorage.getItem("@userToken");
       if (!token) {
         console.error("Token não encontrado");
@@ -208,12 +205,12 @@ export const SalaoProvider = ({ children }) => {
         return;
       }
 
-      // Mapear os horários pro formato esperado
+      // Mapear os horários para o formato esperado pelo backend
       const diasFormatados = dias.map((dia) => ({
         ...dia,
-        horarios: dia.horarios.map((h) => ({
-          hora: h,
-        }))
+        horarios: dia.horarios.map((horario) => ({
+          hora: horario, // Formatar cada horário como um objeto { hora: "08:00" }
+        })),
       }));
 
       const response = await api.post(
@@ -221,19 +218,79 @@ export const SalaoProvider = ({ children }) => {
         { dias: diasFormatados },
         {
           headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setHorarios(response.data);
+      carregarHorarios()
+
+    } catch (error) {
+      console.log("Erro ao criar um horário:", error.response?.data || error.message);
+    }
+  }
+
+  // Buscar Horários criados
+  const carregarHorarios = async () => {
+    try {
+      if (!dadosDoSalao || !dadosDoSalao._id) {
+        console.log("ID do salão não encontrado");
+        return;
+      }
+
+      const response = await api.get(`/api/time/${dadosDoSalao._id}`)
+      setHorarios(response.data.dias);
+
+
+    } catch (error) {
+      console.log("Erro ao buscar horários:", error.response?.data || error.message);
+    }
+  }
+
+  // Deletar todos os horários
+  const deleteHorarios = async () => {
+    try {
+      const token = await AsyncStorage.getItem("@userToken");
+      if (!token) {
+        console.error("Token não encontrado");
+        return;
+      }
+
+
+      await api.delete(
+        `/api/time/${dadosDoSalao._id}`,
+        {
+          headers: {
             Authorization: `Bearer ${token}`
           }
         }
       );
 
-      console.log("Resposta da API:", response.data);
+      // Limpa o estado antes de recarregar
+      setHorarios([]);
+
+      // Atualiza os horários (caso ainda tenha algo no backend)
+      carregarHorarios();
 
     } catch (error) {
-      console.error("Erro ao criar um horário:", error.response?.data || error.message);
+      console.log("Erro ao deletar os horarios", error)
     }
   }
 
+
+
+
   // Carrega os dados ao montar o componente
+
+  // Carrega os dados 
+  useEffect(() => {
+    if (dadosDoSalao && dadosDoSalao._id) {
+      carregarHorarios()
+    }
+  }, [dadosDoSalao])
+
+  // Carrega os dados do Salao
   useEffect(() => {
     buscarSalao();
   }, []);
@@ -258,6 +315,8 @@ export const SalaoProvider = ({ children }) => {
       servicos,
       excluirServico,
       criarHorario,
+      horarios,
+      deleteHorarios
     }}
     >{children}</SalaoContext.Provider>
   )

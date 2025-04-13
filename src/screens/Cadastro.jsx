@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../contexts/auth';
 import Spinner from 'react-native-loading-spinner-overlay';
+import Toast from 'react-native-toast-message';
 
 const CadastroScreen = () => {
   // Navegação
@@ -23,11 +24,19 @@ const CadastroScreen = () => {
     const cadastoUser = await cadastroNewUser(name, email, senha, telefone)
 
     if (!cadastoUser) {
-      return Alert.alert("Erro ao criar conta!")
+      Toast.show({
+        type: 'error',
+        text1: 'Erro ao criar conta',
+      })
+      return
     }
 
     // Se tiver ele direciona para HOME
     navigation.navigate("Home")
+    Toast.show({
+      type: 'success',
+      text1: 'Sua conta foi criada com sucesso'
+    })
   };
 
 

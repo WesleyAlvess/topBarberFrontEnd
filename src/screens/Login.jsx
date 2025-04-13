@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';  // Importando o useNavigation
 import { AuthContext } from '../contexts/auth';
 import Spinner from 'react-native-loading-spinner-overlay';
+import Toast from 'react-native-toast-message';
 
 
 
@@ -27,11 +28,22 @@ const LoginScreen = () => {
 
     // Verificando se ha um usuario com esses dados no banco
     if (!loginUser) {
-      return Alert.alert("Você não possui uma conta!")
+      Toast.show({
+        type: 'info',
+        text1: 'Parece que você ainda não tem uma conta',
+        text2: 'Verifique seus dados ou crie uma'
+      })
+      return
     }
 
     // Se tiver ele direciona para HOME
     navigation.navigate('Home');
+
+    // Menssagem 
+    Toast.show({
+      type: 'success',
+      text1: 'Você acessou sua conta com sucesso'
+    })
   };
 
 

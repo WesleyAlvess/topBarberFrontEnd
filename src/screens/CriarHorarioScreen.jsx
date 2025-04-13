@@ -3,6 +3,7 @@ import styled from 'styled-components/native';
 import { ScrollView, TouchableOpacity, Text, View } from 'react-native';
 import { SalaoContext } from '../contexts/salaoContext';
 import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/Feather';
 
 // Criei o array Dias da semana
 const diasDaSemana = [
@@ -27,7 +28,7 @@ const horariosDisponiveis = [
 
 const CriarHorarioScreen = () => {
   // Context
-  const { criarHorario } = useContext(SalaoContext);
+  const { criarHorario, horarios, deleteHorarios } = useContext(SalaoContext);
 
   // Estado de dias
   const [dias, setDias] = useState(
@@ -115,14 +116,49 @@ const CriarHorarioScreen = () => {
       text1: 'Horários definidos com sucesso!',
     });
 
+    // 🔄 RESETAR os dias para o estado inicial
+    setDias(
+      diasDaSemana.map((dia) => ({
+        dia: dia.valor,
+        fechado: true,
+        horarios: [],
+      }))
+    );
+
   }
 
   return (
     <Container>
       <ScrollView>
+        {/* Mostrar Horarios Criados */}
+        <DeleteButton onPress={() => deleteHorarios()}>
+          <DeleteText>Deletar todos os horários</DeleteText>
+          <IconStyled name="trash-2" size={20} />
+        </DeleteButton>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>Horários já cadastrados:</Text>
+        {horarios && horarios.length > 0 ? (
+          horarios.map((dia, index) => (
+            <ContainerHora key={dia.dia}>
+              <TextDia>{`Dia: ${dia.nomeDia}`}</TextDia>
+              <TextStatus fechado={dia.fechado}>{`Status: ${dia.fechado ? 'Fechado' : 'Aberto'}`}</TextStatus>
+              {dia.horarios.length > 0 ? (
+                <TextHorario>{`Horários: ${dia.horarios.join(', ')}`}</TextHorario>
+              ) : (
+                <Text>Sem horários disponíveis</Text>
+              )}
+            </ContainerHora>
+
+          ))
+        ) : (
+          <NotHorario >Nenhum horário cadastrado</NotHorario>
+        )}
+
+
+        {/* Criar Horarios */}
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>Criar Horários:</Text>
         {dias.map((dia, index) => (
           <View key={dia.dia}>
-            <Text>{diasDaSemana[index].nome}</Text>
+            <TextDia>{diasDaSemana[index].nome}</TextDia>
 
             <FechadoButton onPress={() => toggleFechado(index)} fechado={dia.fechado}>
               <Text style={{ color: "#fff" }}>{dia.fechado ? 'Fechado' : 'Aberto'}</Text>
@@ -149,7 +185,7 @@ const CriarHorarioScreen = () => {
           <Text style={{ color: '#fff', fontSize: 16 }}>Salvar Horários</Text>
         </BotaoSalvar>
       </ScrollView>
-    </Container>
+    </Container >
   )
 }
 
@@ -159,17 +195,19 @@ export default CriarHorarioScreen
 const Container = styled.View`
   flex: 1;
   padding: 16px;
+  background-color: #f2f2f2;
 `;
 
-const Titulo = styled.Text`
-  font-size: 18px;
-  margin-top: 16px;
-  margin-bottom: 8px;
+const NotHorario = styled.Text`
+  font-size: 15px;
+  margin-bottom: 20px;
+  color: #777;
+  text-align: center;
 `;
 
 const FechadoButton = styled.TouchableOpacity`
   background-color: ${({ fechado }) => (fechado ? '#4a4949' : '#58be58')};
-  padding: 10px;
+  padding: 14px;
   border-radius: 8px;
   margin-bottom: 8px;
   align-items: center;
@@ -196,3 +234,55 @@ const BotaoSalvar = styled.TouchableOpacity`
   margin-top: 20px;
 `;
 
+const ContainerHora = styled.View`
+  background-color: #f8f8f8;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 4px;
+  elevation: 2;
+`;
+
+const TextDia = styled.Text`
+  font-size: 15px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+`;
+
+const TextStatus = styled.Text`
+  font-size: 13px;
+  color: ${({ fechado }) => (fechado ? '#c0392b' : '#27ae60')};
+  margin-bottom: 6px;
+`;
+
+const TextHorario = styled.Text`
+  font-size: 13px;
+  color: #555;
+`;
+
+const DeleteButton = styled.TouchableOpacity`
+  background-color: #e74c3c;  
+  padding: 9px 16px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;  
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  
+`;
+
+const DeleteText = styled.Text`
+  color: #fff;  
+  font-size: 16px;
+  margin-right: 8px;  
+  font-weight: bold;  
+`;
+
+const IconStyled = styled(Icon)`
+  color: #fff;  // Cor do ícone branco para contraste
+`;

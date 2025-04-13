@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Para armazenar os dados do token
 import React, { createContext, useEffect, useState } from "react";
-import { Alert } from "react-native";
+import Toast from "react-native-toast-message";
 import api from "../services/api"
 
 export const AuthContext = createContext({})
@@ -47,14 +47,14 @@ export const AuthProvider = ({ children }) => {
 
       // Verifica se os dados do usuario estão vindo corretamente
       if (!response.data) {
-        Alert.alert("Erro: resposta sem dados");
+        console.log("Erro: resposta sem dados");
         return null
       }
 
       // Coloca os dados dentro de loginDataUser 
       setUser(response.data)
 
-      // Salva o token do usuário
+      // Salva o token do usuário e os dados também
       await salvaTokenAndDataUser(response.data.token, response.data)
 
       // Retorna os dados
@@ -86,7 +86,6 @@ export const AuthProvider = ({ children }) => {
       })
 
       if (!response.data.token) {
-        Alert.alert("Erro: Token não retornado no cadastro.");
         return null;
       }
 
@@ -125,7 +124,10 @@ export const AuthProvider = ({ children }) => {
       // Retorna para página de LOGIN
       navigation.navigate("Login")
 
-      Alert.alert("Você saiu da sua conta")
+      Toast.show({
+        type: 'info',
+        text1: 'Você saiu da sua conta'
+      })
 
     } catch (error) {
       console.error("Erro ao sair da conta!", error)

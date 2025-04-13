@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Modal, Alert } from 'react-native';
+import { Modal } from 'react-native';
 import styled from 'styled-components/native';
-// import { useAuth } from '../contexts/AuthContext'; // Supondo que você tenha o contexto Auth
 
 const ModalEditProfile = ({
   nome,
