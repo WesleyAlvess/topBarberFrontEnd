@@ -11,6 +11,9 @@ import HomeSalaoScreen from '../screens/HomeSalao';
 import CriarServicoScreen from '../screens/CriarServicoScreen';
 import CriarHorarioScreen from '../screens/CriarHorarioScreen';
 import AgendamentosScreen from '../screens/AgendamentosScreen';
+import BuscarSalao from '../screens/BuscarSalao'
+import ServicosSalao from '../screens/ServicosSalao';
+import HorariosServico from '../screens/HorarioServico';
 
 const Stack = createNativeStackNavigator()
 
@@ -28,6 +31,9 @@ export const Routes = () => {
       <Stack.Screen name="CriarServico" component={CriarServicoScreen} />
       <Stack.Screen name="CriarHorario" component={CriarHorarioScreen} />
       <Stack.Screen name="Agendamentos" component={AgendamentosScreen} />
+      <Stack.Screen name="BuscarSalao" component={BuscarSalao} />
+      <Stack.Screen name="ServicosSalao" component={ServicosSalao} />
+      <Stack.Screen name="HorarioServico" component={HorariosServico} />
 
     </Stack.Navigator>
   )

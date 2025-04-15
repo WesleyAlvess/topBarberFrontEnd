@@ -81,6 +81,7 @@ const HomeScreen = () => {
 
 
 
+
   return (
     <Container>
       {/* Modal */}
@@ -110,7 +111,7 @@ const HomeScreen = () => {
         <ActionButton onPress={() => setOpenModalEdit(true)}>
           <ButtonText>Editar Perfil</ButtonText>
         </ActionButton>
-        <ActionButton>
+        <ActionButton onPress={(() => navigation.navigate("BuscarSalao"))}>
           <ButtonText>Agendar</ButtonText>
         </ActionButton>
         {/* Se o usuário já tem um salão, mostra "Meu Salão", senão "Criar Salão" */}

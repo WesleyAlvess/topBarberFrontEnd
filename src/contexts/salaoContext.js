@@ -145,6 +145,8 @@ export const SalaoProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log(response.data);
+
       setServicos(response.data); // Atualiza os serviços corretamente
 
 
@@ -278,7 +280,22 @@ export const SalaoProvider = ({ children }) => {
     }
   }
 
+  // Busca o salão pelo número de telefone
+  const buscaSalaoPeloNumero = async ({ telefone }) => {
+    try {
+      console.log("Esse é o número vindo do Busca salão:", telefone);
 
+      const response = await api.get(`api/buscar/celular/${telefone}`);
+
+      setDadosDoSalao(response.data)
+      console.log("Salão encontrado:", response.data);
+
+      return response.data; // retornando os dados para o componente usar
+    } catch (error) {
+      console.log("Erro ao buscar o salão pelo telefone:", error);
+      return null;
+    }
+  };
 
 
   // Carrega os dados ao montar o componente
@@ -316,7 +333,8 @@ export const SalaoProvider = ({ children }) => {
       excluirServico,
       criarHorario,
       horarios,
-      deleteHorarios
+      deleteHorarios,
+      buscaSalaoPeloNumero,
     }}
     >{children}</SalaoContext.Provider>
   )
