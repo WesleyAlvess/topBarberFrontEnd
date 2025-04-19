@@ -13,6 +13,7 @@ export const SalaoProvider = ({ children }) => {
   const [dadosDoSalao, setDadosDoSalao] = useState(null) // Armazena dados do salao
   const [servicos, setServicos] = useState([]) // Armazenar dados do serviço
   const [horarios, setHorarios] = useState([]) // Armazena os dados dos horários
+  const [diasDisponiveis, setDiasDisponiveis] = useState([]); // Armazena dias disponiveis para agendamento
 
 
   // ✅ Busca os dados do salão do usuário autenticado
@@ -145,7 +146,7 @@ export const SalaoProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log(response.data);
+      // console.log(response.data);
 
       setServicos(response.data); // Atualiza os serviços corretamente
 
@@ -283,12 +284,10 @@ export const SalaoProvider = ({ children }) => {
   // Busca o salão pelo número de telefone
   const buscaSalaoPeloNumero = async ({ telefone }) => {
     try {
-      console.log("Esse é o número vindo do Busca salão:", telefone);
 
       const response = await api.get(`api/buscar/celular/${telefone}`);
 
       setDadosDoSalao(response.data)
-      console.log("Salão encontrado:", response.data);
 
       return response.data; // retornando os dados para o componente usar
     } catch (error) {
@@ -297,8 +296,31 @@ export const SalaoProvider = ({ children }) => {
     }
   };
 
+  // Busca horários disponiveis durante a semana
+  const horariosDisponiveisSemana = async () => {
+    try {
+      if (!dadosDoSalao || !dadosDoSalao._id) {
+        console.error("Erro: ID do salão não encontrado.");
+        return;
+      }
+
+      const response = await api.get(`api/time/disponiveis/${dadosDoSalao._id}`)
+      console.log(response.data);
+
+      setDiasDisponiveis(response.data)
+
+    } catch (error) {
+      console.log("Erro ao buscar horários disponiveis:", error.response?.data || error.message);
+    }
+  }
 
   // Carrega os dados ao montar o componente
+
+  useEffect(() => {
+    if (dadosDoSalao?._id) {
+      horariosDisponiveisSemana()
+    }
+  }, [dadosDoSalao])
 
   // Carrega os dados 
   useEffect(() => {
@@ -309,8 +331,11 @@ export const SalaoProvider = ({ children }) => {
 
   // Carrega os dados do Salao
   useEffect(() => {
-    buscarSalao();
-  }, []);
+    if (user) {
+      buscarSalao();
+    }
+  }, [user]);
+
 
   // Carrega os serviços apenas quando os dados do salão forem carregados
   useEffect(() => {
@@ -335,6 +360,7 @@ export const SalaoProvider = ({ children }) => {
       horarios,
       deleteHorarios,
       buscaSalaoPeloNumero,
+      diasDisponiveis
     }}
     >{children}</SalaoContext.Provider>
   )

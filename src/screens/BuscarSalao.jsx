@@ -25,7 +25,7 @@ const BuscarSalao = () => {
 
       if (dadosDoSalao) {
         // Só navega para "ServicosSalao" se o salão for encontrado
-        navigation.navigate("ServicosSalao");
+        navigation.navigate("ServicosHorariosSalao");
       } else {
         // Caso não encontre o salão, exibe a mensagem e permanece na mesma página
         Toast.show({
